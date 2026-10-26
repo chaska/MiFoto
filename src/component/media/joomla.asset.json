@@ -1,7 +1,7 @@
 {
 	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
 	"name": "com_mifoto",
-	"version": "0.2.1",
+	"version": "0.3.0",
 	"description": "MiFoto profile photos",
 	"license": "GPL-3.0-or-later",
 	"assets": [
@@ -10,6 +10,19 @@
 			"description": "Shape, frame and shadow of every MiFoto photo. Any extension can load it with useStyle('com_mifoto.avatar').",
 			"type": "style",
 			"uri": "com_mifoto/avatar.css"
+		},
+		{
+			"name": "com_mifoto.widget",
+			"description": "The profile photo widget (choose, crop, upload, remove): used by the user plugin and by the module.",
+			"type": "style",
+			"uri": "com_mifoto/widget.css"
+		},
+		{
+			"name": "com_mifoto.widget",
+			"description": "Behaviour of the profile photo widget.",
+			"type": "script",
+			"uri": "com_mifoto/widget.js",
+			"attributes": {"defer": true}
 		},
 		{
 			"name": "com_mifoto.settings",

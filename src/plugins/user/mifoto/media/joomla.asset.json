@@ -1,21 +1,10 @@
 {
 	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
 	"name": "plg_user_mifoto",
-	"version": "0.2.1",
+	"version": "0.3.0",
 	"description": "MiFoto photo widget for the Joomla profile form",
 	"license": "GPL-3.0-or-later",
 	"assets": [
-		{
-			"name": "plg_user_mifoto.widget",
-			"type": "style",
-			"uri": "plg_user_mifoto/mifoto.css"
-		},
-		{
-			"name": "plg_user_mifoto.widget",
-			"type": "script",
-			"uri": "plg_user_mifoto/mifoto.js",
-			"attributes": {"defer": true}
-		},
 		{
 			"name": "plg_user_mifoto.admin",
 			"type": "script",

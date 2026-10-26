@@ -23,7 +23,11 @@ PARTS = {
 	'plg_user_mifoto.zip': SRC / 'plugins' / 'user' / 'mifoto',
 	'plg_content_mifoto.zip': SRC / 'plugins' / 'content' / 'mifoto',
 	'plg_engage_mifoto.zip': SRC / 'plugins' / 'engage' / 'mifoto',
+	'mod_mifoto_photo.zip': SRC / 'modules' / 'mifoto_photo',
 }
+
+# Manifest of each part: the module's is named after the module, the others are all "mifoto.xml".
+MANIFESTS = {'mod_mifoto_photo.zip': 'mod_mifoto_photo.xml'}
 
 
 def files_of(folder: Path):
@@ -87,8 +91,12 @@ def make_zip(folder: Path) -> bytes:
 
 
 def main():
-	roots = [check_manifest(folder, 'mifoto.xml') for folder in PARTS.values()]
+	roots = [check_manifest(folder, MANIFESTS.get(name, 'mifoto.xml')) for name, folder in PARTS.items()]
 	pkg = ET.parse(SRC / 'package' / 'pkg_mifoto.xml').getroot()
+
+	script = pkg.findtext('scriptfile')
+	if script and not (SRC / 'package' / script).is_file():
+		fail(f'el paquete nombra el script "{script}" y no existe en src/package')
 	versions = {version_of(r) for r in roots} | {version_of(pkg)}
 
 	# The package must list exactly the zips this script builds.
@@ -105,6 +113,9 @@ def main():
 
 	with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
 		z.writestr(entry('pkg_mifoto.xml'), (SRC / 'package' / 'pkg_mifoto.xml').read_bytes())
+
+		if script:
+			z.writestr(entry(script), (SRC / 'package' / script).read_bytes())
 
 		for name, folder in PARTS.items():
 			inner = make_zip(folder)

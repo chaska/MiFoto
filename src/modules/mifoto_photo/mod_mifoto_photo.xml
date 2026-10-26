@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   MiFoto
+  ~ @copyright Copyright (c) 2026 ChasKa
+  ~ @license   GNU General Public License version 3, or later
+  -->
+<extension type="module" client="site" method="upgrade">
+	<name>MOD_MIFOTO_PHOTO</name>
+	<creationDate>2026-10-27</creationDate>
+	<author>ChasKa</author>
+	<authorEmail>no-reply@example.invalid</authorEmail>
+	<authorUrl></authorUrl>
+	<copyright>Copyright (c) 2026 ChasKa</copyright>
+	<license>GNU/GPL v3 or any later version</license>
+	<version>0.3.0</version>
+	<description>MOD_MIFOTO_PHOTO_XML_DESCRIPTION</description>
+	<namespace path="src">Chaska\Module\MifotoPhoto</namespace>
+	<php_minimum>8.1.0</php_minimum>
+
+	<files>
+		<folder module="mod_mifoto_photo">services</folder>
+		<folder>src</folder>
+		<folder>tmpl</folder>
+	</files>
+
+	<languages folder="language">
+		<language tag="en-GB">en-GB/mod_mifoto_photo.ini</language>
+		<language tag="en-GB">en-GB/mod_mifoto_photo.sys.ini</language>
+		<language tag="es-ES">es-ES/mod_mifoto_photo.ini</language>
+		<language tag="es-ES">es-ES/mod_mifoto_photo.sys.ini</language>
+	</languages>
+
+	<config>
+		<fields name="params">
+			<fieldset name="advanced">
+				<!-- the content depends on who is logged in: never cached -->
+				<field name="cache" type="hidden" default="0" />
+			</fieldset>
+		</fields>
+	</config>
+</extension>

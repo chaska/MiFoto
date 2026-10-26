@@ -4,12 +4,13 @@ Fotos de perfil para Joomla 5 y 6. Cada persona sube su foto desde su perfil; t�
 
 ## 1. Instalar
 
-1. Extensiones → Gestionar → Instalar → sube `pkg_mifoto_<versión>.zip` tal cual, sin descomprimir.
-2. Extensiones → Plugins → activa los que uses:
-   - **Usuario - MiFoto**: pone la foto en el perfil (obligatorio para que los usuarios puedan subirla).
+1. Extensiones → Gestionar → Instalar → sube `pkg_mifoto_<versión>.zip` tal cual, sin descomprimir. **Para actualizar, instala el ZIP nuevo encima, sin desinstalar nada**: Joomla conserva las opciones, los permisos, las fotos y qué plugins tienes activados.
+2. El paquete instala un componente, tres plugins y un módulo. Los tres plugins se **encienden solos la primera vez** (Joomla los instala apagados y por eso a veces no sale nada); después respeta lo que tú decidas. Compruébalo en Extensiones → Plugins:
+   - **Usuario - MiFoto**: pone la foto en el perfil y la moderación en la edición de usuarios del administrador.
    - **Contenido - MiFoto**: las etiquetas `{user}` en artículos y módulos.
    - **Engage - MiFoto**: la foto en los comentarios de Akeeba Engage (solo si usas Engage).
-3. Componentes → MiFoto → **Opciones → Permisos**. Los permisos empiezan sin asignar, así que ningún usuario normal puede subir ni ver fotos hasta que los des:
+3. El módulo **MiFoto - Foto del usuario** (Extensiones → Módulos → Nuevo) pone el mismo bloque de subir/recortar/cambiar/quitar **donde tú lo coloques**, sin depender de la plantilla. Es la forma segura si tu plantilla personaliza la página «Edite su perfil» y el bloque no aparece dentro del formulario (ver el apartado 9). Asígnalo a esa página y a la posición que quieras. No lo uses a la vez que el bloque del formulario: saldría dos veces.
+4. Componentes → MiFoto → **Permisos**. Los permisos empiezan sin asignar, así que ningún usuario normal puede subir ni ver fotos hasta que los des:
 
 | Permiso | Para qué | Normalmente a |
 |---|---|---|
@@ -89,7 +90,7 @@ $html   = $service->avatarHtml($userId, 64, null, 'Marta');   // <img> o inicial
 
 | Síntoma | Qué mirar |
 |---|---|
-| No sale el bloque en el perfil | ¿Está activado «Usuario - MiFoto»? ¿Estás en la página de perfil de la web, no en el administrador? |
+| No sale el bloque en el perfil | 1) ¿Está activado «Usuario - MiFoto»? 2) Si la página «Edite su perfil» está personalizada (plantilla con override en `html/com_users/profile/edit.php`), muchas plantillas solo pintan los campos básicos y se saltan los que añaden los plugins. Dos soluciones: usa el **módulo** «MiFoto - Foto del usuario» (apartado 1), o en ese `edit.php` añade, justo antes de los botones Guardar y Cancelar: `<?php foreach ($this->form->getFieldsets() as $fieldset) : ?><?php if ($fieldset->name === 'core') { continue; } ?><?php echo $this->form->renderFieldset($fieldset->name); ?><?php endforeach; ?>` |
 | «Tu grupo no puede subir foto» | Permiso «Subir su propia foto» en Opciones → Permisos |
 | Sube bien pero los demás no la ven | Permiso «Ver fotos de otros», y que la foto no esté oculta en Fotos |
 | «El servidor no puede procesar fotos» | Falta la extensión PHP **GD con WebP** en el hosting |
@@ -98,4 +99,4 @@ $html   = $service->avatarHtml($userId, 64, null, 'Marta');   // <img> o inicial
 
 ## 10. Desinstalar
 
-Al desinstalar el paquete se borran las tablas de MiFoto. **Las fotos de `images/MiFoto` no se borran**: bórrala a mano si ya no la quieres.
+Desinstalar el paquete **no borra datos**: las tablas de MiFoto y las fotos de `images/MiFoto` se quedan, así que si lo vuelves a instalar todo sigue ahí. Lo que sí se pierde al desinstalar son las opciones (forma, límites…) y los permisos, porque Joomla borra la extensión; vuelve a ponerlos. Para borrarlo todo de verdad: elimina a mano las tablas `#__mifoto_photos` y `#__mifoto_limits` y la carpeta `images/MiFoto`.
