@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fields name="mifoto">
+		<fieldset name="mifoto" label="PLG_USER_MIFOTO_FIELDSET" addfieldprefix="Chaska\Plugin\User\Mifoto\Field">
+			<field name="photo" type="Mifotophoto" label="PLG_USER_MIFOTO_FIELDSET" />
+		</fieldset>
+	</fields>
+</form>

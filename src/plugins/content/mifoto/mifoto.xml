@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   MiFoto
+  ~ @copyright Copyright (c) 2026 ChasKa
+  ~ @license   GNU General Public License version 3, or later
+  -->
+<extension type="plugin" group="content" method="upgrade">
+	<name>PLG_CONTENT_MIFOTO</name>
+	<creationDate>2026-10-26</creationDate>
+	<author>ChasKa</author>
+	<authorEmail>no-reply@example.invalid</authorEmail>
+	<authorUrl></authorUrl>
+	<copyright>Copyright (c) 2026 ChasKa</copyright>
+	<license>GNU/GPL v3 or any later version</license>
+	<version>0.1.0</version>
+	<description>PLG_CONTENT_MIFOTO_XML_DESCRIPTION</description>
+	<namespace path="src">Chaska\Plugin\Content\Mifoto</namespace>
+	<php_minimum>8.1.0</php_minimum>
+
+	<files>
+		<folder plugin="mifoto">services</folder>
+		<folder>src</folder>
+	</files>
+
+	<languages folder="language">
+		<language tag="en-GB">en-GB/plg_content_mifoto.ini</language>
+		<language tag="en-GB">en-GB/plg_content_mifoto.sys.ini</language>
+		<language tag="es-ES">es-ES/plg_content_mifoto.ini</language>
+		<language tag="es-ES">es-ES/plg_content_mifoto.sys.ini</language>
+	</languages>
+
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field name="default_size" type="list" default="64" label="PLG_CONTENT_MIFOTO_DEFAULT_SIZE" description="PLG_CONTENT_MIFOTO_DEFAULT_SIZE_DESC" validate="options">
+					<option value="32">32</option>
+					<option value="64">64</option>
+					<option value="96">96</option>
+					<option value="128">128</option>
+					<option value="300">300</option>
+				</field>
+			</fieldset>
+		</fields>
+	</config>
+</extension>

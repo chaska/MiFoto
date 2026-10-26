@@ -1,0 +1,141 @@
+/*
+ * MiFoto profile widget. Colours come from the system (Canvas, CanvasText) so it follows light and dark themes;
+ * the photo itself takes its shape, frame and shadow from com_mifoto's avatar.css.
+ */
+.mifoto-widget {
+	display: flex;
+	align-items: flex-start;
+	gap: 1.25rem;
+	padding: 1rem 0;
+}
+
+.mifoto-widget__avatar {
+	width: 96px;
+	height: 96px;
+	font-size: 32px;
+}
+
+.mifoto-widget__body {
+	flex: 1;
+	min-width: 0;
+}
+
+.mifoto-widget__title {
+	margin: 0 0 .25rem;
+	font-weight: 600;
+}
+
+.mifoto-widget__help {
+	margin: 0 0 .75rem;
+	font-size: .875rem;
+	opacity: .75;
+}
+
+.mifoto-widget__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5rem;
+}
+
+/* visually hidden but still reachable by the browser's file chooser */
+.mifoto-widget__file {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+.mifoto-widget__status {
+	min-height: 1.4em;
+	margin: .5rem 0 0;
+	font-size: .875rem;
+}
+
+.mifoto-widget__status.is-error {
+	color: #a32d2d;
+}
+
+.mifoto-widget.is-busy {
+	cursor: progress;
+}
+
+.mifoto-crop {
+	box-sizing: border-box;
+	width: min(92vw, 360px);
+	padding: 1.25rem;
+	border: 1px solid rgba(128, 128, 128, .4);
+	border-radius: 12px;
+	background: Canvas;
+	color: CanvasText;
+}
+
+.mifoto-crop::backdrop {
+	background: rgba(0, 0, 0, .5);
+}
+
+.mifoto-crop__title {
+	margin: 0 0 .25rem;
+	font-size: 1.1rem;
+}
+
+.mifoto-crop__help {
+	margin: 0 0 .75rem;
+	font-size: .875rem;
+	opacity: .75;
+}
+
+.mifoto-crop__viewport {
+	position: relative;
+	display: block;
+	width: min(80vw, 280px);
+	height: min(80vw, 280px);
+	margin: 0 auto .75rem;
+	overflow: hidden;
+	cursor: grab;
+	touch-action: none;
+	outline: 2px dashed rgba(128, 128, 128, .7);
+	outline-offset: 3px;
+	background: #888;
+}
+
+.mifoto-crop__viewport:active {
+	cursor: grabbing;
+}
+
+.mifoto-crop__viewport:focus-visible {
+	outline: 3px solid #378add;
+}
+
+.mifoto-crop__viewport img {
+	position: absolute;
+	max-width: none;
+	user-select: none;
+	-webkit-user-drag: none;
+	pointer-events: none;
+}
+
+.mifoto-crop__zoom {
+	display: flex;
+	align-items: center;
+	gap: .75rem;
+	margin: 0 0 1rem;
+	font-size: .875rem;
+}
+
+.mifoto-crop__zoom input {
+	flex: 1;
+}
+
+.mifoto-crop__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5rem;
+}
+
+@media (max-width: 480px) {
+	.mifoto-widget {
+		flex-direction: column;
+	}
+}

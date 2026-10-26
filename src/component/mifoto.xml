@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   MiFoto
+  ~ @copyright Copyright (c) 2026 ChasKa
+  ~ @license   GNU General Public License version 3, or later
+  -->
+<extension type="component" version="4.0.0" method="upgrade">
+	<name>COM_MIFOTO</name>
+	<creationDate>2026-10-26</creationDate>
+	<author>ChasKa</author>
+	<authorEmail>no-reply@example.invalid</authorEmail>
+	<authorUrl></authorUrl>
+	<copyright>Copyright (c) 2026 ChasKa</copyright>
+	<license>GNU/GPL v3 or any later version</license>
+	<version>0.1.0</version>
+	<description>COM_MIFOTO_XML_DESCRIPTION</description>
+	<namespace path="src">Chaska\Component\Mifoto</namespace>
+	<php_minimum>8.1.0</php_minimum>
+
+	<files folder="frontend">
+		<folder>src</folder>
+	</files>
+
+	<languages folder="frontend/language">
+		<language tag="en-GB">en-GB/com_mifoto.ini</language>
+		<language tag="es-ES">es-ES/com_mifoto.ini</language>
+	</languages>
+
+	<administration>
+		<menu>COM_MIFOTO</menu>
+		<submenu>
+			<menu link="option=com_mifoto&amp;view=photos">COM_MIFOTO_MENU_PHOTOS</menu>
+			<menu link="option=com_config&amp;view=component&amp;component=com_mifoto">COM_MIFOTO_MENU_OPTIONS</menu>
+		</submenu>
+
+		<files folder="backend">
+			<folder>services</folder>
+			<folder>sql</folder>
+			<folder>src</folder>
+			<folder>tmpl</folder>
+			<filename>access.xml</filename>
+			<filename>config.xml</filename>
+		</files>
+
+		<languages folder="backend/language">
+			<language tag="en-GB">en-GB/com_mifoto.ini</language>
+			<language tag="en-GB">en-GB/com_mifoto.sys.ini</language>
+			<language tag="es-ES">es-ES/com_mifoto.ini</language>
+			<language tag="es-ES">es-ES/com_mifoto.sys.ini</language>
+		</languages>
+	</administration>
+
+	<media destination="com_mifoto" folder="media">
+		<folder>css</folder>
+		<filename>joomla.asset.json</filename>
+	</media>
+
+	<install>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+			<file driver="postgresql" charset="utf8">sql/install.postgresql.sql</file>
+		</sql>
+	</install>
+
+	<uninstall>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
+			<file driver="postgresql" charset="utf8">sql/uninstall.postgresql.sql</file>
+		</sql>
+	</uninstall>
+
+	<update>
+		<schemas>
+			<schemapath type="mysql">sql/updates/mysql</schemapath>
+			<schemapath type="postgresql">sql/updates/postgresql</schemapath>
+		</schemas>
+	</update>
+</extension>

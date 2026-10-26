@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   MiFoto
+  ~ @copyright Copyright (c) 2026 ChasKa
+  ~ @license   GNU General Public License version 3, or later
+  -->
+<extension type="plugin" group="engage" method="upgrade">
+	<name>PLG_ENGAGE_MIFOTO</name>
+	<creationDate>2026-10-26</creationDate>
+	<author>ChasKa</author>
+	<authorEmail>no-reply@example.invalid</authorEmail>
+	<authorUrl></authorUrl>
+	<copyright>Copyright (c) 2026 ChasKa</copyright>
+	<license>GNU/GPL v3 or any later version</license>
+	<version>0.1.0</version>
+	<description>PLG_ENGAGE_MIFOTO_XML_DESCRIPTION</description>
+	<namespace path="src">Chaska\Plugin\Engage\Mifoto</namespace>
+	<php_minimum>8.1.0</php_minimum>
+
+	<files>
+		<folder plugin="mifoto">services</folder>
+		<folder>src</folder>
+	</files>
+
+	<languages folder="language">
+		<language tag="en-GB">en-GB/plg_engage_mifoto.ini</language>
+		<language tag="en-GB">en-GB/plg_engage_mifoto.sys.ini</language>
+		<language tag="es-ES">es-ES/plg_engage_mifoto.ini</language>
+		<language tag="es-ES">es-ES/plg_engage_mifoto.sys.ini</language>
+	</languages>
+</extension>
