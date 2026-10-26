@@ -71,6 +71,60 @@ final class PhotoService
 			return null;
 		}
 
+		return $this->toData($row, $size);
+	}
+
+	/**
+	 * Many photos with ONE query, for lists (a ranking of 500 people must not make 500 queries). Only people who have a photo
+	 * the viewer may see appear in the result; the rest are simply missing from it.
+	 *
+	 * @param   int[]  $ownerIds
+	 *
+	 * @return  array<int, PhotoData>  keyed by user id
+	 */
+	public function getPhotos(array $ownerIds, int $size = 64, ?User $viewer = null): array
+	{
+		$ids = array_values(array_unique(array_filter(array_map('intval', $ownerIds), static fn (int $i): bool => $i > 0)));
+
+		if ($ids === [])
+		{
+			return [];
+		}
+
+		$viewer = $viewer ?? Factory::getApplication()->getIdentity();
+		$mayView = (bool) $viewer->authorise('mifoto.view', self::ACL_ASSET);
+		$isMod   = (bool) $viewer->authorise('mifoto.moderate', self::ACL_ASSET);
+		$out     = [];
+
+		foreach (array_chunk($ids, 500) as $chunk)
+		{
+			$query = $this->db->getQuery(true)
+				->select('*')
+				->from($this->db->quoteName('#__mifoto_photos'))
+				->whereIn($this->db->quoteName('user_id'), $chunk);
+
+			foreach ((array) $this->db->setQuery($query)->loadObjectList() as $row)
+			{
+				$owner = (int) $row->user_id;
+
+				if (AccessPolicy::mayView($viewer->id === $owner && $owner > 0, $mayView, $isMod, (int) $row->state))
+				{
+					$out[$owner] = $this->toData($row, $size);
+				}
+			}
+		}
+
+		return $out;
+	}
+
+	/** The stored row of one person (or null). For admin screens; it holds no file names. */
+	public function photoRow(int $ownerId): ?\stdClass
+	{
+		return $this->rowFor($ownerId);
+	}
+
+	private function toData(\stdClass $row, int $size): PhotoData
+	{
 		$side = PhotoStorage::nearestSize($size);
 		$k    = min(1.0, $side / max(1, max((int) $row->width, (int) $row->height)));
 
@@ -109,6 +163,9 @@ final class PhotoService
 		{
 			throw new SanitizeException('too_fast');
 		}
+
+		// Every attempt counts (also the ones that fail), so nobody can use the processor as a free image-eater.
+		$this->consumeUploadAttempt($ownerId);
 
 		$storage = $this->settings->storage();
 
@@ -191,7 +248,8 @@ final class PhotoService
 			return false;
 		}
 
-		$this->deleteForUser($ownerId);
+		// Removing a photo does NOT reset the hourly counter: remove + upload in a loop must not get around the limit.
+		$this->deletePhoto($ownerId);
 
 		return true;
 	}
@@ -210,8 +268,25 @@ final class PhotoService
 		return true;
 	}
 
-	/** No permission check: for the "user deleted" event and for the owner/moderator paths above, which check first. */
+	/** The account is gone (the "user deleted" event): photo, row and upload counter. No permission check. */
 	public function deleteForUser(int $ownerId): void
+	{
+		if ($ownerId < 1)
+		{
+			return;
+		}
+
+		$this->deletePhoto($ownerId);
+
+		$query = $this->db->getQuery(true)
+			->delete($this->db->quoteName('#__mifoto_limits'))
+			->where($this->db->quoteName('user_id') . ' = :id')
+			->bind(':id', $ownerId, ParameterType::INTEGER);
+		$this->db->setQuery($query)->execute();
+	}
+
+	/** Files and row of the photo; the upload counter stays. */
+	private function deletePhoto(int $ownerId): void
 	{
 		if ($ownerId < 1)
 		{
@@ -225,6 +300,44 @@ final class PhotoService
 			->where($this->db->quoteName('user_id') . ' = :id')
 			->bind(':id', $ownerId, ParameterType::INTEGER);
 		$this->db->setQuery($query)->execute();
+	}
+
+	/** Counts one upload attempt in the person's hourly window; refuses with "too_many" when the limit is used up. */
+	private function consumeUploadAttempt(int $ownerId): void
+	{
+		$max = $this->settings->maxUploadsPerHour();
+
+		if ($max < 1)
+		{
+			return; // 0 = no limit
+		}
+
+		$query = $this->db->getQuery(true)
+			->select('*')
+			->from($this->db->quoteName('#__mifoto_limits'))
+			->where($this->db->quoteName('user_id') . ' = :id')
+			->bind(':id', $ownerId, ParameterType::INTEGER);
+		$row = $this->db->setQuery($query)->loadObject();
+
+		$now   = time();
+		$start = $row instanceof \stdClass ? (int) strtotime((string) $row->window_start . ' UTC') : 0;
+		$check = UploadLimit::check($row instanceof \stdClass ? (int) $row->uploads : 0, $start, $now, $max);
+
+		if (!$check['allowed'])
+		{
+			throw new SanitizeException('too_many');
+		}
+
+		$data = (object) ['user_id' => $ownerId, 'window_start' => gmdate('Y-m-d H:i:s', $check['start']), 'uploads' => $check['count']];
+
+		if ($row instanceof \stdClass)
+		{
+			$this->db->updateObject('#__mifoto_limits', $data, 'user_id');
+		}
+		else
+		{
+			$this->db->insertObject('#__mifoto_limits', $data);
+		}
 	}
 
 	/** The row behind an opaque public key (used by the delivery controller), or null. */

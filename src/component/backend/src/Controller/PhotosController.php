@@ -17,6 +17,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Session\Session;
 
 /** Moderation: look at the photos, hide or show one, remove one. Every change needs the moderate permission and a form token. */
 final class PhotosController extends BaseController
@@ -46,9 +47,25 @@ final class PhotosController extends BaseController
 		$this->act('remove');
 	}
 
+	/**
+	 * With "&ajax=1" (the buttons on the user edit page) the answer is JSON and nobody is redirected; without it (the list of
+	 * photos) it is the usual redirect with a message.
+	 */
 	private function act(string $what): void
 	{
-		$this->checkToken('post');
+		$ajax = $this->input->getInt('ajax', 0) === 1;
+
+		if ($ajax)
+		{
+			if (!Session::checkToken('post'))
+			{
+				$this->json(['ok' => false, 'message' => Text::_('JINVALID_TOKEN')], 403);
+			}
+		}
+		else
+		{
+			$this->checkToken('post');
+		}
 
 		$app  = Factory::getApplication();
 		$back = Route::_('index.php?option=com_mifoto&view=photos', false);
@@ -56,7 +73,7 @@ final class PhotosController extends BaseController
 
 		if (!$user->authorise('mifoto.moderate', 'com_mifoto'))
 		{
-			$this->setRedirect($back, Text::_('COM_MIFOTO_PHOTOS_NOT_ALLOWED'), 'error');
+			$ajax ? $this->json(['ok' => false, 'message' => Text::_('COM_MIFOTO_PHOTOS_NOT_ALLOWED')], 403) : $this->setRedirect($back, Text::_('COM_MIFOTO_PHOTOS_NOT_ALLOWED'), 'error');
 
 			return;
 		}
@@ -66,7 +83,7 @@ final class PhotosController extends BaseController
 
 		if ($row === null)
 		{
-			$this->setRedirect($back, Text::_('COM_MIFOTO_PHOTOS_GONE'), 'warning');
+			$ajax ? $this->json(['ok' => false, 'message' => Text::_('COM_MIFOTO_PHOTOS_GONE')], 404) : $this->setRedirect($back, Text::_('COM_MIFOTO_PHOTOS_GONE'), 'warning');
 
 			return;
 		}
@@ -82,6 +99,28 @@ final class PhotosController extends BaseController
 			$service->setState($user, $owner, $what === 'show' ? AccessPolicy::VISIBLE : AccessPolicy::HIDDEN);
 		}
 
+		if ($ajax)
+		{
+			$this->json(['ok' => true, 'action' => $what]);
+		}
+
 		$this->setRedirect($back, Text::_('COM_MIFOTO_PHOTOS_DONE_' . strtoupper($what)));
+	}
+
+	/** @param array<string, mixed> $data */
+	private function json(array $data, int $status = 200): never
+	{
+		while (ob_get_level() > 0)
+		{
+			@ob_end_clean();
+		}
+
+		http_response_code($status);
+		header('Content-Type: application/json; charset=utf-8');
+		header('Cache-Control: no-store');
+		header('X-Content-Type-Options: nosniff');
+		echo json_encode($data, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+		Factory::getApplication()->close();
+		exit;
 	}
 }

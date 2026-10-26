@@ -30,9 +30,11 @@ final class Settings
 	private string $frame;
 	private string $shadow;
 	private bool $crop;
+	private int $maxUploadsPerHour;
 
-	public function __construct(string $path, int $maxMb, int $quality, int $cacheMinutes, string $secret, string $shape = 'circle', string $frame = 'none', string $shadow = 'none', bool $crop = true)
+	public function __construct(string $path, int $maxMb, int $quality, int $cacheMinutes, string $secret, string $shape = 'circle', string $frame = 'none', string $shadow = 'none', bool $crop = true, int $maxUploadsPerHour = 10)
 	{
+		$this->maxUploadsPerHour = min(1000, max(0, $maxUploadsPerHour));
 		// Only these words ever become CSS class names: anything else falls back to the default look.
 		$this->shape        = \in_array($shape, ['circle', 'square', 'soft'], true) ? $shape : 'circle';
 		$this->frame        = \in_array($frame, ['none', 'thin', 'thick'], true) ? $frame : 'none';
@@ -58,8 +60,15 @@ final class Settings
 			(string) $p->get('shape', 'circle'),
 			(string) $p->get('frame', 'none'),
 			(string) $p->get('shadow', 'none'),
-			(bool) $p->get('crop', 1)
+			(bool) $p->get('crop', 1),
+			(int) $p->get('max_uploads_hour', 10)
 		);
+	}
+
+	/** Upload attempts one person may make per hour; 0 means no limit. */
+	public function maxUploadsPerHour(): int
+	{
+		return $this->maxUploadsPerHour;
 	}
 
 	/** The admin's look for every photo: "mifoto-avatar mifoto-shape-circle mifoto-frame-none mifoto-shadow-none". Safe to print as a class attribute. */
