@@ -1,6 +1,10 @@
 # Built by `python build/build.py`; not source.
 /dist/
 
+# Python caches
+__pycache__/
+*.pyc
+
 # Editor and OS leftovers
 .DS_Store
 Thumbs.db

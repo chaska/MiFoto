@@ -39,20 +39,30 @@ final class Mifoto extends CMSPlugin implements SubscriberInterface
 		// Joomla 5.x events carry named arguments (getForm()); older style passes the form first.
 		$form = method_exists($event, 'getForm') ? $event->getForm() : $event->getArgument(0);
 
-		if (!$form instanceof Form || $form->getName() !== 'com_users.profile' || !ComponentHelper::isEnabled('com_mifoto'))
+		if (!$form instanceof Form || !ComponentHelper::isEnabled('com_mifoto'))
 		{
 			return;
 		}
 
-		$app = $this->getApplication();
+		$app  = $this->getApplication();
+		$user = $app->getIdentity();
+		$name = $form->getName();
 
-		if (!$app->isClient('site') || $app->getIdentity()->guest)
+		// The person's own profile page on the site: upload, crop, change, remove.
+		if ($name === 'com_users.profile' && $app->isClient('site') && !$user->guest)
 		{
+			Form::addFormPath(\dirname(__DIR__, 2) . '/forms');
+			$form->loadFile('mifoto', false);
+
 			return;
 		}
 
-		Form::addFormPath(\dirname(__DIR__, 2) . '/forms');
-		$form->loadFile('mifoto', false);
+		// The user edit page in the administrator: moderation only (hide, show, remove).
+		if ($name === 'com_users.user' && $app->isClient('administrator') && $user->authorise('mifoto.moderate', 'com_mifoto'))
+		{
+			Form::addFormPath(\dirname(__DIR__, 2) . '/forms');
+			$form->loadFile('mifoto_admin', false);
+		}
 	}
 
 	/** A deleted account takes its photo with it (files and row). Never lets a photo problem break the deletion. */

@@ -11,3 +11,10 @@ CREATE TABLE IF NOT EXISTS "#__mifoto_photos" (
   PRIMARY KEY ("user_id")
 );
 CREATE UNIQUE INDEX IF NOT EXISTS "#__mifoto_photos_idx_pkey" ON "#__mifoto_photos" ("pkey");
+
+CREATE TABLE IF NOT EXISTS "#__mifoto_limits" (
+  "user_id" integer NOT NULL,
+  "window_start" timestamp without time zone NOT NULL,
+  "uploads" smallint NOT NULL DEFAULT 0,
+  PRIMARY KEY ("user_id")
+);

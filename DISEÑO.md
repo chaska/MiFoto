@@ -69,10 +69,10 @@ Forma (círculo, cuadrado, esquinas suaves), marco (grosor/color), sombra. CSS p
 ## Recorte (decidido 26/10/2026)
 Paso opcional en el navegador al elegir el archivo: marco con la forma que fijó el admin, mover y ajustar, botón «Usar la foto entera». Se envía solo la parte elegida, pero el servidor revalida todo igual (el recorte es comodidad, no seguridad). JS propio sin librerías. El admin puede desactivarlo en Opciones; activo por defecto.
 
-## Estado a 26/10/2026 (v0.1.0, paquete `dist/pkg_mifoto_0.1.0.zip`)
-Hecho: componente (permisos, opciones, servicio, entrega, endpoints subir/quitar, pantalla Fotos con búsqueda, ocultar, mostrar y quitar), plugin de usuario (widget en el perfil con recorte), plugin de contenido (`{user}`, `{user 42}`, `{user size=96}`), plugin de Engage. 188 pruebas automáticas pasan (PHP y node); el widget se probó en un navegador real con la subida simulada.
+## Estado a 26/10/2026 (v0.2.0, paquete `dist/pkg_mifoto_0.2.0.zip`)
+Hecho: componente (permisos, opciones, servicio con `getPhoto`/`getPhotos`/`avatarHtml`, entrega, endpoints subir/quitar, pantalla Fotos con búsqueda, ocultar, mostrar y quitar, límite de subidas por hora), plugin de usuario (widget en el perfil con recorte; moderación en la edición de usuarios del administrador), plugin de contenido (`{user}`, `{user 42}`, `{user size=96}`), plugin de Engage, guía en `docs/GUIA.md`. Adaptador del mapa hecho en el repo del mapa (`ProfilePhoto.php`, campo `av` en `RankingController::row()` y `TripRepository::forMap`, JS y CSS), sin commit allí. 224 pruebas automáticas de MiFoto pasan (PHP y node) y 20 del adaptador del mapa; el widget se probó en un navegador real con la subida simulada.
 NO probado todavía: instalación y funcionamiento dentro de un Joomla 6 real (Chas lo prueba con el ZIP).
-Falta: adaptador del mapa (campo `av` en `RankingController::row()` y `TripRepository::forMap`), guía de uso, evento `onMiFotoGetPhoto` para plugins, widget en el formulario de administración de usuarios, limitar subidas por hora, probar el orden Engage/Gravatar con Engage 3.4.12.
+Falta: evento `onMiFotoGetPhoto` para plugins, probar el orden Engage/Gravatar con Engage 3.4.12, cambiar el archivo de idioma `COM_MAPAVIAJES_REPORT_REASON_` (fallo previo de las pruebas del mapa, no es de MiFoto).
 
 ## Pendiente de confirmar
 - Sintaxis exacta del shortcode.
