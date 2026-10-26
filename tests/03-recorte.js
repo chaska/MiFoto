@@ -1,7 +1,7 @@
 'use strict';
 // Geometria del recorte (funciones puras de mifoto.js). Sin dependencias: node tests/03-recorte.js
 const path = require('path');
-const g = require(path.join(__dirname, '..', 'src', 'plugins', 'user', 'mifoto', 'media', 'js', 'mifoto.js'));
+const g = require(path.join(__dirname, '..', 'src', 'component', 'media', 'js', 'widget.js'));
 
 let ok = 0, fail = 0;
 const afirma = (c, m) => { if (c) { ok++; console.log('  ok    ' + m); } else { fail++; console.log('  FALLA ' + m); } };

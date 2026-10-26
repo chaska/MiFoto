@@ -12,7 +12,7 @@
 	<authorUrl></authorUrl>
 	<copyright>Copyright (c) 2026 ChasKa</copyright>
 	<license>GNU/GPL v3 or any later version</license>
-	<version>0.2.1</version>
+	<version>0.3.0</version>
 	<description>PLG_USER_MIFOTO_XML_DESCRIPTION</description>
 	<namespace path="src">Chaska\Plugin\User\Mifoto</namespace>
 	<php_minimum>8.1.0</php_minimum>
@@ -31,7 +31,6 @@
 	</languages>
 
 	<media destination="plg_user_mifoto" folder="media">
-		<folder>css</folder>
 		<folder>js</folder>
 		<filename>joomla.asset.json</filename>
 	</media>
