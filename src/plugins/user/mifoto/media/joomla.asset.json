@@ -1,7 +1,7 @@
 {
 	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
 	"name": "plg_user_mifoto",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "MiFoto photo widget for the Joomla profile form",
 	"license": "GPL-3.0-or-later",
 	"assets": [
