@@ -1,0 +1,15 @@
+{
+	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+	"name": "com_mifoto",
+	"version": "0.1.0",
+	"description": "MiFoto profile photos",
+	"license": "GPL-3.0-or-later",
+	"assets": [
+		{
+			"name": "com_mifoto.avatar",
+			"description": "Shape, frame and shadow of every MiFoto photo. Any extension can load it with useStyle('com_mifoto.avatar').",
+			"type": "style",
+			"uri": "com_mifoto/avatar.css"
+		}
+	]
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   MiFoto
+  ~ @copyright Copyright (c) 2026 ChasKa
+  ~ @license   GNU General Public License version 3, or later
+  -->
+<extension type="package" method="upgrade">
+	<name>MiFoto</name>
+	<packagename>mifoto</packagename>
+	<creationDate>2026-10-26</creationDate>
+	<author>ChasKa</author>
+	<authorEmail>no-reply@example.invalid</authorEmail>
+	<authorUrl></authorUrl>
+	<copyright>Copyright (c) 2026 ChasKa</copyright>
+	<license>GNU/GPL v3 or any later version</license>
+	<version>0.1.0</version>
+	<description>Profile photos for Joomla 5 and 6: safe upload, WebP conversion and per-group permissions. After installing, enable the plugins "User - MiFoto" (profile form), "Content - MiFoto" ({user} tag) and, if you use Akeeba Engage, "Engage - MiFoto"; then set the MiFoto permissions.</description>
+	<files folder="packages">
+		<file type="component" id="com_mifoto">com_mifoto.zip</file>
+		<file type="plugin" id="mifoto" group="user">plg_user_mifoto.zip</file>
+		<file type="plugin" id="mifoto" group="content">plg_content_mifoto.zip</file>
+		<file type="plugin" id="mifoto" group="engage">plg_engage_mifoto.zip</file>
+	</files>
+</extension>

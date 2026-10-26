@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<access component="com_mifoto">
+	<section name="component">
+		<action name="core.admin" title="JACTION_ADMIN" description="JACTION_ADMIN_COMPONENT_DESC" />
+		<action name="core.options" title="JACTION_OPTIONS" description="JACTION_OPTIONS_COMPONENT_DESC" />
+		<action name="core.manage" title="JACTION_MANAGE" description="JACTION_MANAGE_COMPONENT_DESC" />
+		<action name="mifoto.upload" title="COM_MIFOTO_ACTION_UPLOAD" description="COM_MIFOTO_ACTION_UPLOAD_DESC" />
+		<action name="mifoto.view" title="COM_MIFOTO_ACTION_VIEW" description="COM_MIFOTO_ACTION_VIEW_DESC" />
+		<action name="mifoto.moderate" title="COM_MIFOTO_ACTION_MODERATE" description="COM_MIFOTO_ACTION_MODERATE_DESC" />
+	</section>
+</access>

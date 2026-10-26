@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+	<fieldset name="storage" label="COM_MIFOTO_CONFIG_STORAGE" description="COM_MIFOTO_CONFIG_STORAGE_DESC">
+		<field name="storage_path" type="text" default="images/MiFoto" label="COM_MIFOTO_CONFIG_STORAGE_PATH" description="COM_MIFOTO_CONFIG_STORAGE_PATH_DESC" filter="path" />
+		<field name="max_mb" type="number" default="10" min="1" max="20" step="1" label="COM_MIFOTO_CONFIG_MAX_MB" description="COM_MIFOTO_CONFIG_MAX_MB_DESC" />
+		<field name="long_side" type="list" default="300" label="COM_MIFOTO_CONFIG_LONG_SIDE" description="COM_MIFOTO_CONFIG_LONG_SIDE_DESC" validate="options">
+			<option value="300">300</option>
+		</field>
+		<field name="quality" type="number" default="82" min="50" max="95" step="1" label="COM_MIFOTO_CONFIG_QUALITY" />
+		<field name="crop" type="radio" default="1" layout="joomla.form.field.radio.switcher" label="COM_MIFOTO_CONFIG_CROP" description="COM_MIFOTO_CONFIG_CROP_DESC">
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+		<field name="cache_minutes" type="number" default="10" min="0" max="1440" step="1" label="COM_MIFOTO_CONFIG_CACHE" description="COM_MIFOTO_CONFIG_CACHE_DESC" />
+	</fieldset>
+
+	<fieldset name="style" label="COM_MIFOTO_CONFIG_STYLE" description="COM_MIFOTO_CONFIG_STYLE_DESC">
+		<field name="shape" type="list" default="circle" label="COM_MIFOTO_CONFIG_SHAPE" validate="options">
+			<option value="circle">COM_MIFOTO_SHAPE_CIRCLE</option>
+			<option value="square">COM_MIFOTO_SHAPE_SQUARE</option>
+			<option value="soft">COM_MIFOTO_SHAPE_SOFT</option>
+		</field>
+		<field name="frame" type="list" default="none" label="COM_MIFOTO_CONFIG_FRAME" validate="options">
+			<option value="none">COM_MIFOTO_FRAME_NONE</option>
+			<option value="thin">COM_MIFOTO_FRAME_THIN</option>
+			<option value="thick">COM_MIFOTO_FRAME_THICK</option>
+		</field>
+		<field name="shadow" type="list" default="none" label="COM_MIFOTO_CONFIG_SHADOW" validate="options">
+			<option value="none">COM_MIFOTO_SHADOW_NONE</option>
+			<option value="soft">COM_MIFOTO_SHADOW_SOFT</option>
+			<option value="strong">COM_MIFOTO_SHADOW_STRONG</option>
+		</field>
+	</fieldset>
+
+	<fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL" description="JCONFIG_PERMISSIONS_DESC">
+		<field name="rules" type="rules" label="JCONFIG_PERMISSIONS_LABEL" filter="rules" validate="rules" component="com_mifoto" section="component" />
+	</fieldset>
+</config>
