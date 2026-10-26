@@ -1,7 +1,7 @@
 {
 	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
 	"name": "com_mifoto",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "MiFoto profile photos",
 	"license": "GPL-3.0-or-later",
 	"assets": [
@@ -10,6 +10,19 @@
 			"description": "Shape, frame and shadow of every MiFoto photo. Any extension can load it with useStyle('com_mifoto.avatar').",
 			"type": "style",
 			"uri": "com_mifoto/avatar.css"
+		},
+		{
+			"name": "com_mifoto.settings",
+			"description": "The settings screen of the administrator.",
+			"type": "style",
+			"uri": "com_mifoto/settings.css"
+		},
+		{
+			"name": "com_mifoto.settings",
+			"description": "Live preview on the settings screen.",
+			"type": "script",
+			"uri": "com_mifoto/settings.js",
+			"attributes": {"defer": true}
 		}
 	]
 }

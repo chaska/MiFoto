@@ -13,7 +13,7 @@
 	<authorUrl></authorUrl>
 	<copyright>Copyright (c) 2026 ChasKa</copyright>
 	<license>GNU/GPL v3 or any later version</license>
-	<version>0.2.0</version>
+	<version>0.2.1</version>
 	<description>Profile photos for Joomla 5 and 6: safe upload, WebP conversion and per-group permissions. After installing, enable the plugins "User - MiFoto" (profile form), "Content - MiFoto" ({user} tag) and, if you use Akeeba Engage, "Engage - MiFoto"; then set the MiFoto permissions.</description>
 	<files folder="packages">
 		<file type="component" id="com_mifoto">com_mifoto.zip</file>

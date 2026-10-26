@@ -47,6 +47,7 @@ final class HtmlView extends BaseHtmlView
 		$this->pagination = new Pagination($total, $start, $limit);
 
 		ToolbarHelper::title(Text::_('COM_MIFOTO_PHOTOS_TITLE'), 'users');
+		ToolbarHelper::link('index.php?option=com_mifoto&view=settings', 'COM_MIFOTO_MENU_SETTINGS', 'cog');
 
 		if ($user->authorise('core.admin', 'com_mifoto') || $user->authorise('core.options', 'com_mifoto'))
 		{
