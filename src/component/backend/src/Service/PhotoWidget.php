@@ -11,6 +11,8 @@ namespace Chaska\Component\Mifoto\Administrator\Service;
 
 defined('_JEXEC') || die;
 
+use Joomla\CMS\Access\Access;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Session\Session;
@@ -24,7 +26,63 @@ use Joomla\CMS\User\User;
  */
 final class PhotoWidget
 {
-	private const TEXT_KEYS = ['CHOOSE', 'CHANGE', 'REMOVE', 'REMOVE_CONFIRM', 'UPLOADING', 'UPLOADED', 'REMOVED', 'TOO_BIG', 'BAD_TYPE', 'CANT_READ', 'GENERIC_ERROR', 'CROP_TITLE', 'CROP_HELP', 'CROP_ZOOM', 'CROP_SAVE', 'CROP_WHOLE', 'CROP_CANCEL'];
+	private const TEXT_KEYS = ['CHOOSE', 'CHANGE', 'REMOVE', 'REMOVE_CONFIRM', 'UPLOADING', 'UPLOADED', 'REMOVED', 'TOO_BIG', 'BAD_TYPE', 'CANT_READ', 'GENERIC_ERROR', 'CROP_TITLE', 'CROP_HELP', 'CROP_ZOOM', 'CROP_SAVE', 'CROP_WHOLE', 'CROP_CANCEL', 'CONSENT_NEEDED'];
+
+	/**
+	 * Who will see the photo, worked out from the permissions the administrator set (not from a text somebody could forget to update):
+	 * 'public' when the Public group may view, 'registered' when the group people join may, 'some' otherwise.
+	 */
+	public static function audience(): string
+	{
+		if (Access::checkGroup(1, 'mifoto.view', 'com_mifoto'))
+		{
+			return 'public';
+		}
+
+		$joined = (int) ComponentHelper::getParams('com_users')->get('new_usertype', 2);
+
+		return Access::checkGroup($joined, 'mifoto.view', 'com_mifoto') ? 'registered' : 'some';
+	}
+
+	/** A piece of text with one %s in it, the part around it escaped and $inner (already safe HTML) in its place. */
+	private static function around(string $text, string $inner): string
+	{
+		$e     = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+		$parts = explode('%s', $text, 2);
+
+		return $e($parts[0]) . $inner . $e($parts[1] ?? '');
+	}
+
+	/**
+	 * The notice (who sees the photo, where, cookies), the two boxes the person must tick and the contact for removals.
+	 * The upload button refuses to work until both are ticked, and the server refuses the upload as well.
+	 */
+	private static function consentHtml(Settings $settings): string
+	{
+		$e     = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+		$who   = Text::_('COM_MIFOTO_W_NOTICE_WHO_' . strtoupper(self::audience()));
+		$where = $settings->shownWhere() !== '' ? $settings->shownWhere() : Text::_('COM_MIFOTO_W_NOTICE_WHERE_DEFAULT');
+
+		$policy = $settings->privacyUrl() !== ''
+			? '<a href="' . $e($settings->privacyUrl()) . '" target="_blank" rel="noopener">' . $e(Text::_('COM_MIFOTO_W_PRIVACY_LINK')) . '</a>'
+			: $e(Text::_('COM_MIFOTO_W_PRIVACY_LINK'));
+
+		$h  = '<div class="mifoto-consent">';
+		$h .= '<p class="mifoto-consent__notice">' . $e(Text::sprintf('COM_MIFOTO_W_NOTICE', $who, $where)) . '</p>';
+		$h .= '<p class="mifoto-consent__cookies">' . $e(Text::_('COM_MIFOTO_W_NOTICE_COOKIES')) . '</p>';
+		$h .= '<label class="mifoto-consent__box"><input type="checkbox" data-role="consent-owner"> <span>' . $e(Text::_('COM_MIFOTO_W_CONSENT_OWNER')) . '</span></label>';
+		$h .= '<label class="mifoto-consent__box"><input type="checkbox" data-role="consent-data"> <span>' . self::around(Text::_('COM_MIFOTO_W_CONSENT_DATA'), $policy) . '</span></label>';
+
+		$contact = $settings->contact();
+
+		if ($contact !== '')
+		{
+			$href = str_contains($contact, '@') ? 'mailto:' . $contact : $contact;
+			$h   .= '<p class="mifoto-consent__contact">' . self::around(Text::_('COM_MIFOTO_W_CONTACT'), '<a href="' . $e($href) . '">' . $e($contact) . '</a>') . '</p>';
+		}
+
+		return $h . '</div>';
+	}
 
 	/** Empty for a guest. */
 	public static function html(PhotoService $service, User $user): string
@@ -80,6 +138,11 @@ final class PhotoWidget
 		$h .= '<div class="mifoto-widget__body">';
 		$h .= '<p class="mifoto-widget__title">' . $e(Text::_('COM_MIFOTO_W_CURRENT')) . '</p>';
 		$h .= '<p class="mifoto-widget__help">' . $e($help) . '</p>';
+		if ($canUp)
+		{
+			$h .= self::consentHtml($settings);
+		}
+
 		$h .= '<div class="mifoto-widget__actions">';
 
 		if ($canUp)

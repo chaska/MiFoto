@@ -100,12 +100,17 @@ namespace {
 	afirma($a !== null && str_contains($a, 'IN `folder` (content,engage)') && !str_contains($a, 'user'), 'solo toca Engage y Contenido (el de Usuario se queda como esta)');
 	afirma($a !== null && str_contains($a, '`access` = 1') && str_contains($a, '`access` = 2'), 'pone Public (1) solo donde estaba en Registrado (2): no pisa lo que el admin eligio');
 
+	$onlyPrivacy = static fn (array $ran): bool => count($ran) >= 1 && str_contains($ran[0], 'IN `folder` (privacy)') && !str_contains($ran[0], 'user') && !str_contains($ran[0], 'engage');
 	$r = $run('update', '0.4.0');
-	afirma(!$enabled($r) && $access($r) !== null, 'actualizar desde 0.4.0: arregla el acceso pero NO vuelve a encender plugins que el admin apagara');
+	afirma($access($r) !== null && $enabled($r) && $onlyPrivacy($r), 'actualizar desde 0.4.0: arregla el acceso y enciende SOLO el plugin nuevo de privacidad (no los que el admin apagara)');
 	$r = $run('update', '0.4.1');
-	afirma($r === [], 'actualizar desde 0.4.1: no toca nada');
+	afirma($access($r) === null && $enabled($r) && $onlyPrivacy($r) && count($r) === 1, 'actualizar desde 0.4.1: solo enciende el plugin de privacidad, el acceso no se toca');
 	$r = $run('update', '0.5.0');
+	afirma($r === [], 'actualizar desde 0.5.0: no toca nada');
+	$r = $run('update', '0.6.0');
 	afirma($r === [], 'actualizar desde una version posterior: no toca nada');
+	$r = $run('install', null);
+	afirma(count(array_filter($r, static fn (string $s): bool => str_contains($s, '(user,content,engage,privacy)'))) === 1, 'instalacion nueva: enciende los cuatro plugins, privacidad incluido');
 	$r = $run('update', '0.2.0');
 	afirma($enabled($r) && $access($r) !== null, 'actualizar desde antes de la 0.3.0: enciende y arregla acceso una vez');
 	$r = $run('update', null);

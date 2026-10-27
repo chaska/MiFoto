@@ -97,6 +97,11 @@ final class Health
 			? self::item('ok', 'COM_MIFOTO_A_H_PERMS', 'COM_MIFOTO_A_H_PERMS_D', '', '', Text::_('COM_MIFOTO_A_H_YES'))
 			: self::item('warn', 'COM_MIFOTO_A_H_PERMS', 'COM_MIFOTO_A_H_PERMS_BAD', 'index.php?option=com_mifoto&view=permissions', 'COM_MIFOTO_A_H_FIX');
 
+		// 4b. the notice people accept before uploading should point at the site's privacy policy
+		$items[] = $service->settings()->privacyUrl() !== ''
+			? self::item('ok', 'COM_MIFOTO_A_H_LEGAL', 'COM_MIFOTO_A_H_LEGAL_D', '', '', Text::_('COM_MIFOTO_A_H_YES'))
+			: self::item('warn', 'COM_MIFOTO_A_H_LEGAL', 'COM_MIFOTO_A_H_LEGAL_BAD', 'index.php?option=com_mifoto&view=settings', 'COM_MIFOTO_A_H_FIX');
+
 		// 5. the optional module
 		$placed = 0;
 

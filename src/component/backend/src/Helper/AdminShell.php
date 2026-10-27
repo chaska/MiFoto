@@ -65,8 +65,21 @@ final class AdminShell
 		return Uri::base(true) . '/index.php?option=com_mifoto&task=photos.image&pkey=' . rawurlencode($pkey) . '&size=' . $size;
 	}
 
+	/** Number of reports nobody has dealt with yet; 0 if it cannot be read (the tables do not exist yet, say). */
+	public static function openReports(): int
+	{
+		try
+		{
+			return Factory::getApplication()->bootComponent('com_mifoto')->getPhotoService()->reports()->countOpen();
+		}
+		catch (\Throwable $e)
+		{
+			return 0;
+		}
+	}
+
 	/**
-	 * @param   string                                                                       $active  panel|photos|settings|permissions
+	 * @param   string                                                                       $active  panel|photos|reports|settings|permissions
 	 * @param   array{users: int, visible: int, hidden: int, with: int, without: int}        $totals
 	 */
 	public static function open(string $active, array $totals): string
@@ -83,6 +96,13 @@ final class AdminShell
 			'photos'      => ['COM_MIFOTO_MENU_PHOTOS', 'image', (string) $totals['with']],
 			'permissions' => ['COM_MIFOTO_MENU_PERMISSIONS', 'key', ''],
 		];
+
+		// Reports are for moderators; the tab carries the number of open ones so a new report is noticed.
+		if ($user->authorise('mifoto.moderate', 'com_mifoto'))
+		{
+			$open = self::openReports();
+			$tabs = array_slice($tabs, 0, 2, true) + ['reports' => ['COM_MIFOTO_MENU_REPORTS', 'shield', $open > 0 ? (string) $open : '']] + array_slice($tabs, 2, null, true);
+		}
 
 		if ($user->authorise('core.admin', 'com_mifoto') || $user->authorise('core.options', 'com_mifoto'))
 		{

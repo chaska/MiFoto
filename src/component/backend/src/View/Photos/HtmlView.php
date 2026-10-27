@@ -46,6 +46,9 @@ final class HtmlView extends BaseHtmlView
 	/** Names and usernames of everybody are for moderators only. */
 	public bool $restricted = false;
 
+	/** The newest consent record of the selected person (when, which text), or null if there is none. */
+	public ?\stdClass $consent = null;
+
 	public function display($tpl = null): void
 	{
 		$app   = Factory::getApplication();
@@ -80,6 +83,18 @@ final class HtmlView extends BaseHtmlView
 		}
 
 		$this->canModerate = $app->getIdentity()->authorise('mifoto.moderate', 'com_mifoto');
+
+		if ($this->selected !== null && !$this->restricted)
+		{
+			try
+			{
+				$this->consent = $app->bootComponent('com_mifoto')->getPhotoService()->consents()->latest((int) $this->selected->id);
+			}
+			catch (\Throwable $e)
+			{
+				$this->consent = null; // the table does not exist yet: shown as "no record"
+			}
+		}
 
 		ToolbarHelper::title(Text::_('COM_MIFOTO'), 'image');
 

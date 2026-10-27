@@ -92,8 +92,22 @@
 		var zoomEl = q('zoom');
 		var maxBytes = parseInt(w.dataset.maxBytes, 10) || 0;
 		var canCrop = w.dataset.crop === '1' && dlg && typeof dlg.showModal === 'function' && !!window.HTMLCanvasElement;
+		var consentOwner = q('consent-owner');
+		var consentData = q('consent-data');
 		var busy = false;
 		var current = null;
+
+		/* Both boxes (owner of the photo + data protection) must be ticked before a photo is chosen; the server checks them again. */
+		function consentGiven() {
+			return !!(consentOwner && consentData && consentOwner.checked && consentData.checked);
+		}
+
+		function askConsent() {
+			setStatus(t('CONSENT_NEEDED'), true);
+			var first = consentOwner && !consentOwner.checked ? consentOwner : consentData;
+
+			if (first && first.focus) { first.focus(); }
+		}
 
 		function setStatus(msg, isError) {
 			statusEl.textContent = msg || '';
@@ -166,6 +180,11 @@
 
 			var fd = new FormData();
 			fd.append('photo', blob, name);
+
+			if (consentGiven()) {
+				fd.append('consent_owner', '1');
+				fd.append('consent_data', '1');
+			}
 
 			post(w.dataset.uploadUrl, fd).then(function (r) {
 				if (r.ok && r.data && r.data.ok) {
@@ -344,7 +363,14 @@
 		/* ---- buttons ---- */
 
 		if (chooseBtn && fileInput) {
-			chooseBtn.addEventListener('click', function () { if (!busy) { fileInput.click(); } });
+			chooseBtn.addEventListener('click', function () {
+				if (busy) { return; }
+
+				if (!consentGiven()) { askConsent(); return; }
+
+				setStatus('', false);
+				fileInput.click();
+			});
 			fileInput.addEventListener('change', function () {
 				var f = fileInput.files && fileInput.files[0];
 				fileInput.value = '';

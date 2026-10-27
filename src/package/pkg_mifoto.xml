@@ -13,13 +13,14 @@
 	<authorUrl></authorUrl>
 	<copyright>Copyright (c) 2026 ChasKa</copyright>
 	<license>GNU/GPL v3 or any later version</license>
-	<version>0.4.1</version>
+	<version>0.5.0</version>
 	<description>Profile photos for Joomla 5 and 6: safe upload, WebP conversion and per-group permissions. The three plugins ("User - MiFoto" for the profile form, "Content - MiFoto" for the {user} tag, "Engage - MiFoto" for Akeeba Engage comments) are switched on the first time; the module "MiFoto - User photo" can be placed anywhere. Then set the MiFoto permissions. Uninstalling keeps the photos and their tables.</description>
 	<files folder="packages">
 		<file type="component" id="com_mifoto">com_mifoto.zip</file>
 		<file type="plugin" id="mifoto" group="user">plg_user_mifoto.zip</file>
 		<file type="plugin" id="mifoto" group="content">plg_content_mifoto.zip</file>
 		<file type="plugin" id="mifoto" group="engage">plg_engage_mifoto.zip</file>
+		<file type="plugin" id="mifoto" group="privacy">plg_privacy_mifoto.zip</file>
 		<file type="module" id="mod_mifoto_photo" client="site">mod_mifoto_photo.zip</file>
 	</files>
 	<scriptfile>script.php</scriptfile>

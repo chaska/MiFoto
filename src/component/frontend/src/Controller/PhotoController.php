@@ -12,7 +12,9 @@ namespace Chaska\Component\Mifoto\Site\Controller;
 defined('_JEXEC') || die;
 
 use Chaska\Component\Mifoto\Administrator\Security\SanitizeException;
+use Chaska\Component\Mifoto\Administrator\Service\Consent;
 use Chaska\Component\Mifoto\Administrator\Service\PhotoServer;
+use Chaska\Component\Mifoto\Administrator\Service\Reports;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
@@ -49,7 +51,9 @@ final class PhotoController extends BaseController
 
 		try
 		{
-			$photo = Factory::getApplication()->bootComponent('com_mifoto')->getPhotoService()->upload($user, (int) $user->id, $file);
+			// The two consent boxes travel with the photo; the server refuses the upload unless both say exactly "1".
+			$consented = Consent::accepted($this->input->post->get('consent_owner', '', 'raw'), $this->input->post->get('consent_data', '', 'raw'));
+			$photo     = Factory::getApplication()->bootComponent('com_mifoto')->getPhotoService()->upload($user, (int) $user->id, $file, $consented);
 		}
 		catch (SanitizeException $e)
 		{
@@ -60,6 +64,34 @@ final class PhotoController extends BaseController
 		}
 
 		$this->json(['ok' => true, 'url' => $photo->url, 'width' => $photo->width, 'height' => $photo->height]);
+	}
+
+	/**
+	 * POST index.php?option=com_mifoto&task=photo.report  (form token, u = the photo's public key, reason, comment).
+	 * Only a logged-in person who is allowed to SEE that photo can report it, so reporting cannot be used to find out who has one.
+	 */
+	public function report(): void
+	{
+		$user    = $this->guard();
+		$service = Factory::getApplication()->bootComponent('com_mifoto')->getPhotoService();
+		$key     = strtolower((string) $this->input->post->get('u', '', 'alnum'));
+		$reason  = Reports::cleanReason($this->input->post->get('reason', '', 'raw'));
+		$comment = Reports::cleanComment($this->input->post->get('comment', '', 'raw'));
+		$row     = $reason !== null ? $service->rowByKey($key) : null;
+
+		if ($row === null || !$service->viewerMaySee($user, (int) $row->user_id, (int) $row->state))
+		{
+			$this->json(['ok' => false, 'message' => Text::_('COM_MIFOTO_W_REPORT_ERR')], 422);
+		}
+
+		$done = $service->reports()->create((int) $user->id, (int) $row->user_id, $reason, $comment);
+
+		if ($done === 'ok')
+		{
+			$this->json(['ok' => true, 'message' => Text::_('COM_MIFOTO_W_REPORT_SENT')]);
+		}
+
+		$this->json(['ok' => false, 'message' => Text::_($done === 'duplicate' ? 'COM_MIFOTO_W_REPORT_DUP' : ($done === 'too_many' ? 'COM_MIFOTO_W_REPORT_MANY' : 'COM_MIFOTO_W_REPORT_ERR'))], $done === 'too_many' ? 429 : 422);
 	}
 
 	/** POST index.php?option=com_mifoto&task=photo.remove  (the form token). Removes the logged-in user's photo. */

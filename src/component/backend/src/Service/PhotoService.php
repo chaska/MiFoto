@@ -14,6 +14,8 @@ defined('_JEXEC') || die;
 use Chaska\Component\Mifoto\Administrator\Security\PhotoStorage;
 use Chaska\Component\Mifoto\Administrator\Security\SanitizeException;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Session\Session;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\User\User;
 use Joomla\CMS\User\UserFactoryInterface;
@@ -123,8 +125,24 @@ final class PhotoService
 		return $this->rowFor($ownerId);
 	}
 
+	/** Proof of acceptance (owner of the photo + data protection), one row per upload. */
+	public function consents(): Consent
+	{
+		return new Consent($this->db);
+	}
+
+	/** Reports about photos and what the moderators did. */
+	public function reports(): Reports
+	{
+		return new Reports($this->db);
+	}
+
 	private function toData(\stdClass $row, int $size): PhotoData
 	{
+		// Every extension gets a photo's address through here, so this is the one place that can turn the "enlarge" behaviour on for
+		// any page that shows MiFoto photos (comments, the map, a module...), whoever draws the <img>.
+		$this->loadLightbox();
+
 		$side = PhotoStorage::nearestSize($size);
 		$k    = min(1.0, $side / max(1, max((int) $row->width, (int) $row->height)));
 
@@ -150,11 +168,17 @@ final class PhotoService
 	 *
 	 * @throws  SanitizeException  Short code (image_type, image_too_big, ...) that maps to COM_MIFOTO_ERR_<CODE>.
 	 */
-	public function upload(User $actor, int $ownerId, array $file): PhotoData
+	public function upload(User $actor, int $ownerId, array $file, bool $consented = false): PhotoData
 	{
 		if (!AccessPolicy::mayUpload($actor->id === $ownerId && $ownerId > 0, (bool) $actor->guest, $actor->authorise('mifoto.upload', self::ACL_ASSET)))
 		{
 			throw new SanitizeException('not_allowed');
+		}
+
+		// Both consent boxes are required for every upload; without them nothing is read, processed or counted.
+		if (!$consented)
+		{
+			throw new SanitizeException('consent_required');
 		}
 
 		$existing = $this->rowFor($ownerId);
@@ -203,12 +227,23 @@ final class PhotoService
 
 		try
 		{
+			// The proof of acceptance is written first: a photo is never shown without its record. If the photo then fails to save,
+			// the record is taken back with it.
+			$this->consents()->record($ownerId, $token);
 			$this->saveRow($ownerId, $existing, $token, $info, $now);
 		}
 		catch (\Throwable $e)
 		{
 			// The row still points at the old photo, which has not been deleted yet: only the new files go, so nothing breaks.
 			$storage->deleteToken($ownerId, $token);
+
+			try
+			{
+				$this->consents()->forget($ownerId, $token);
+			}
+			catch (\Throwable $ignored)
+			{
+			}
 
 			throw new SanitizeException('image_server');
 		}
@@ -269,9 +304,13 @@ final class PhotoService
 			->where($this->db->quoteName('user_id') . ' = :id')
 			->bind(':id', $ownerId, ParameterType::INTEGER);
 		$this->db->setQuery($query)->execute();
+
+		// Acceptances and reports go with the account (they are personal data too).
+		$this->consents()->deleteForUser($ownerId);
+		$this->reports()->deleteForUser($ownerId);
 	}
 
-	/** Files and row of the photo; the upload counter stays. */
+	/** Files and row of the photo; the upload counter stays. The consent given for it is marked as withdrawn. */
 	private function deletePhoto(int $ownerId): void
 	{
 		if ($ownerId < 1)
@@ -279,6 +318,7 @@ final class PhotoService
 			return;
 		}
 
+		$this->consents()->withdraw($ownerId);
 		$this->settings->storage()->deleteUser($ownerId);
 
 		$query = $this->db->getQuery(true)
@@ -482,10 +522,9 @@ final class PhotoService
 		{
 			// "%" and "_" typed by the moderator are literal characters, not wildcards.
 			$like = '%' . addcslashes(mb_substr($search, 0, 100), '%_\\') . '%';
-			$query->where('(' . $db->quoteName('u.name') . ' LIKE :s1 OR ' . $db->quoteName('u.username') . ' LIKE :s2 OR ' . $db->quoteName('u.email') . ' LIKE :s3)')
+			$query->where('(' . $db->quoteName('u.name') . ' LIKE :s1 OR ' . $db->quoteName('u.username') . ' LIKE :s2)')
 				->bind(':s1', $like)
-				->bind(':s2', $like)
-				->bind(':s3', $like);
+				->bind(':s2', $like);
 		}
 
 		return $query;
@@ -507,6 +546,71 @@ final class PhotoService
 		catch (\Throwable $e)
 		{
 			// Without the stylesheet the avatar is still there, only unstyled.
+		}
+	}
+
+	/** Set once per request: the page already has the lightbox. */
+	private static bool $lightboxLoaded = false;
+
+	/**
+	 * "Allow enlarging the profile photo": on a normal HTML page of the site, clicking any MiFoto photo (whoever draws the <img>)
+	 * opens it bigger, with a way to report it. Does nothing when the administrator turned it off, on feeds/JSON/the back end.
+	 */
+	private function loadLightbox(): void
+	{
+		if (self::$lightboxLoaded || !$this->settings->lightboxEnabled())
+		{
+			return;
+		}
+
+		try
+		{
+			$app = Factory::getApplication();
+			$doc = $app->getDocument();
+
+			if (!$app->isClient('site') || $doc->getType() !== 'html' || !method_exists($doc, 'getWebAssetManager'))
+			{
+				return;
+			}
+
+			$app->getLanguage()->load('com_mifoto', JPATH_SITE);
+
+			$texts = [];
+
+			foreach (['ZOOM_CLOSE', 'ZOOM_LABEL', 'REPORT', 'REPORT_TITLE', 'REPORT_REASON', 'REPORT_COMMENT', 'REPORT_SEND', 'REPORT_CANCEL', 'REPORT_SENT', 'REPORT_DUP', 'REPORT_MANY', 'REPORT_ERR', 'REPORT_LOGIN'] as $key)
+			{
+				$texts[$key] = Text::_('COM_MIFOTO_W_' . $key);
+			}
+
+			$reasons = [];
+
+			foreach (Reports::REASONS as $reason)
+			{
+				$reasons[$reason] = Text::_('COM_MIFOTO_REASON_' . strtoupper($reason));
+			}
+
+			$user    = $app->getIdentity();
+			$contact = $this->settings->contact();
+
+			$doc->addScriptOptions('com_mifoto.lightbox', [
+				'reportUrl' => Uri::root(true) . '/index.php?option=com_mifoto&task=photo.report',
+				'token'     => Session::getFormToken(),
+				'loggedIn'  => $user !== null && !$user->guest,
+				'contact'   => $contact,
+				'contactText' => $contact !== '' ? Text::sprintf('COM_MIFOTO_W_CONTACT', '%s') : '',
+				'texts'     => $texts,
+				'reasons'   => $reasons,
+			]);
+
+			$wa = $doc->getWebAssetManager();
+			$wa->getRegistry()->addExtensionRegistryFile('com_mifoto');
+			$wa->useStyle('com_mifoto.lightbox')->useScript('com_mifoto.lightbox');
+
+			self::$lightboxLoaded = true;
+		}
+		catch (\Throwable $e)
+		{
+			// Without the lightbox the photos are simply not clickable.
 		}
 	}
 
