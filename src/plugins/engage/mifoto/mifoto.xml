@@ -12,7 +12,7 @@
 	<authorUrl></authorUrl>
 	<copyright>Copyright (c) 2026 ChasKa</copyright>
 	<license>GNU/GPL v3 or any later version</license>
-	<version>0.5.1</version>
+	<version>0.5.2</version>
 	<description>PLG_ENGAGE_MIFOTO_XML_DESCRIPTION</description>
 	<namespace path="src">Chaska\Plugin\Engage\Mifoto</namespace>
 	<php_minimum>8.1.0</php_minimum>
