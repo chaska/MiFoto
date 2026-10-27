@@ -11,48 +11,73 @@ namespace Chaska\Component\Mifoto\Administrator\View\Photos;
 
 defined('_JEXEC') || die;
 
+use Chaska\Component\Mifoto\Administrator\Service\AdminData;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
-use Joomla\CMS\Pagination\Pagination;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\Database\DatabaseInterface;
 
+/** Photos: the album in big, a search, four filters, and the photo that is selected with its moderation buttons. */
 final class HtmlView extends BaseHtmlView
 {
-	/** @var  array<int, \stdClass> */
+	public const PER_PAGE = 24;
+
+	/** @var array{users: int, visible: int, hidden: int, with: int, without: int} */
+	public array $totals = ['users' => 0, 'visible' => 0, 'hidden' => 0, 'with' => 0, 'without' => 0];
+
+	/** @var array<int, \stdClass> */
 	public array $items = [];
 
-	public ?Pagination $pagination = null;
+	public ?\stdClass $selected = null;
+
+	public string $filter = 'con';
 
 	public string $search = '';
 
+	public int $page = 1;
+
+	public int $pages = 1;
+
+	public int $count = 0;
+
+	public bool $canModerate = false;
+
 	public function display($tpl = null): void
 	{
-		$app     = Factory::getApplication();
-		$input   = $app->getInput();
-		$user    = $app->getIdentity();
-		$service = $app->bootComponent('com_mifoto')->getPhotoService();
-		$limit   = 20;
+		$app   = Factory::getApplication();
+		$input = $app->getInput();
+		$data  = new AdminData(Factory::getContainer()->get(DatabaseInterface::class));
 
-		$this->search = trim((string) $input->getString('filter_search', ''));
-		$total        = $service->countForAdmin($this->search);
-		$start        = max(0, (int) $input->getInt('limitstart', 0));
+		$filter       = (string) $input->getCmd('filter', 'con');
+		$this->filter = \in_array($filter, ['con', 'visibles', 'ocultas', 'sin'], true) ? $filter : 'con';
+		$this->search = trim((string) $input->getString('q', ''));
+		$this->totals = $data->totals();
 
-		if ($start >= $total)
+		$this->count = $data->count($this->filter, $this->search);
+		$this->pages = max(1, (int) ceil($this->count / self::PER_PAGE));
+		$this->page  = max(1, min($this->pages, (int) $input->getInt('pagina', 1)));
+		$this->items = $data->album($this->filter, ($this->page - 1) * self::PER_PAGE, self::PER_PAGE, $this->search, $this->filter === 'sin' ? 'id' : 'recent');
+
+		// The selected photo is one of the page's; with none chosen (or a stale link) the first one is.
+		$key = strtolower((string) $input->getAlnum('pkey', ''));
+
+		foreach ($this->items as $u)
 		{
-			$start = 0;
+			if ($u->pkey !== null && ($u->pkey === $key || $this->selected === null))
+			{
+				$this->selected = $u;
+
+				if ($u->pkey === $key)
+				{
+					break;
+				}
+			}
 		}
 
-		$this->items      = $service->listForAdmin($this->search, $limit, $start);
-		$this->pagination = new Pagination($total, $start, $limit);
+		$this->canModerate = $app->getIdentity()->authorise('mifoto.moderate', 'com_mifoto');
 
-		ToolbarHelper::title(Text::_('COM_MIFOTO_PHOTOS_TITLE'), 'users');
-		ToolbarHelper::link('index.php?option=com_mifoto&view=settings', 'COM_MIFOTO_MENU_SETTINGS', 'cog');
-
-		if ($user->authorise('core.admin', 'com_mifoto') || $user->authorise('core.options', 'com_mifoto'))
-		{
-			ToolbarHelper::preferences('com_mifoto');
-		}
+		ToolbarHelper::title(Text::_('COM_MIFOTO'), 'image');
 
 		parent::display($tpl);
 	}

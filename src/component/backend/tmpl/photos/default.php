@@ -9,110 +9,113 @@ declare(strict_types=1);
 
 defined('_JEXEC') || die;
 
+use Chaska\Component\Mifoto\Administrator\Helper\AdminShell as S;
 use Chaska\Component\Mifoto\Administrator\Service\AccessPolicy;
-use Chaska\Component\Mifoto\Administrator\Service\AvatarRenderer;
-use Chaska\Component\Mifoto\Administrator\Service\Placeholder;
-use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Router\Route;
-use Joomla\CMS\Uri\Uri;
 
 /** @var  \Chaska\Component\Mifoto\Administrator\View\Photos\HtmlView $this */
 
-$app     = Factory::getApplication();
-$wa      = $this->getDocument()->getWebAssetManager();
-$classes = $app->bootComponent('com_mifoto')->getPhotoService()->settings()->cssClasses();
-$canMod  = $app->getIdentity()->authorise('mifoto.moderate', 'com_mifoto');
-$base    = 'index.php?option=com_mifoto';
+$t  = static fn (string $key): string => S::e(Text::_($key));
+$tt = $this->totals;
+$q  = $this->search !== '' ? '&q=' . rawurlencode($this->search) : '';
+$u  = $this->selected;
 
-$wa->getRegistry()->addExtensionRegistryFile('com_mifoto');
-$wa->useStyle('com_mifoto.avatar');
+$chips = [
+	'con'      => ['COM_MIFOTO_A_F_ALL', $tt['with']],
+	'visibles' => ['COM_MIFOTO_A_F_VISIBLE', $tt['visible']],
+	'ocultas'  => ['COM_MIFOTO_A_F_HIDDEN', $tt['hidden']],
+	'sin'      => ['COM_MIFOTO_A_F_WITHOUT', $tt['without']],
+];
 
-$url = static fn (string $query): string => htmlspecialchars(Route::_($base . $query, false), ENT_QUOTES, 'UTF-8');
+echo S::open('photos', $tt);
 ?>
-<form action="<?php echo $url('&view=photos'); ?>" method="post" name="adminForm" id="adminForm">
-	<div class="row mb-3">
-		<div class="col-md-6">
-			<div class="input-group">
-				<input type="search" name="filter_search" class="form-control" value="<?php echo $this->escape($this->search); ?>"
-					placeholder="<?php echo $this->escape(Text::_('COM_MIFOTO_PHOTOS_SEARCH')); ?>" aria-label="<?php echo $this->escape(Text::_('COM_MIFOTO_PHOTOS_SEARCH')); ?>">
-				<button type="submit" class="btn btn-primary"><?php echo Text::_('JSEARCH_FILTER_SUBMIT'); ?></button>
-				<a class="btn btn-outline-secondary" href="<?php echo $url('&view=photos&filter_search='); ?>"><?php echo Text::_('JSEARCH_FILTER_CLEAR'); ?></a>
-			</div>
-		</div>
+<div class="mfa-cols">
+	<div class="mfa-col">
+		<section>
+			<h2><?php echo $t('COM_MIFOTO_A_PHOTOS_TITLE'); ?></h2>
+
+			<form class="mfa-search" action="<?php echo S::url('&view=photos'); ?>" method="get" role="search">
+				<input type="hidden" name="option" value="com_mifoto">
+				<input type="hidden" name="view" value="photos">
+				<input type="hidden" name="filter" value="<?php echo S::e($this->filter); ?>">
+				<label><?php echo S::icon('search'); ?><span class="mfa-sr"><?php echo $t('COM_MIFOTO_PHOTOS_SEARCH'); ?></span>
+					<input type="search" name="q" value="<?php echo S::e($this->search); ?>" placeholder="<?php echo $t('COM_MIFOTO_PHOTOS_SEARCH'); ?>"></label>
+			</form>
+
+			<nav class="mfa-chips" aria-label="<?php echo $t('COM_MIFOTO_A_FILTERS'); ?>">
+				<?php foreach ($chips as $key => [$label, $count]) : ?>
+					<a class="mfa-chip" href="<?php echo S::url('&view=photos&filter=' . $key . $q); ?>"<?php echo $this->filter === $key ? ' aria-current="true"' : ''; ?>><?php echo $t($label); ?> <b><?php echo (int) $count; ?></b></a>
+				<?php endforeach; ?>
+			</nav>
+
+			<?php if (!$this->items) : ?>
+				<p class="mfa-empty"><?php echo $t($this->search !== '' || $this->filter !== 'con' ? 'COM_MIFOTO_A_EMPTY_FILTER' : 'COM_MIFOTO_PHOTOS_EMPTY'); ?></p>
+			<?php else : ?>
+				<div class="mfa-album is-big">
+					<?php foreach ($this->items as $row) : ?>
+						<?php echo $row->pkey !== null
+							? S::sticker($row, S::url('&view=photos&filter=' . $this->filter . $q . '&pagina=' . $this->page . '&pkey=' . $row->pkey), $u !== null && $u->pkey === $row->pkey, S::ago($row->modified))
+							: S::slot($row); ?>
+					<?php endforeach; ?>
+				</div>
+			<?php endif; ?>
+
+			<?php if ($this->pages > 1) : ?>
+				<nav class="mfa-pager is-end" aria-label="<?php echo $t('COM_MIFOTO_A_PAGER'); ?>">
+					<?php if ($this->page > 1) : ?>
+						<a href="<?php echo S::url('&view=photos&filter=' . $this->filter . $q . '&pagina=' . ($this->page - 1)); ?>" aria-label="<?php echo $t('COM_MIFOTO_A_PREV'); ?>"><?php echo S::icon('left'); ?></a>
+					<?php else : ?>
+						<span aria-hidden="true"><?php echo S::icon('left'); ?></span>
+					<?php endif; ?>
+					<?php echo S::e(Text::sprintf('COM_MIFOTO_A_PAGER_OF', $this->page, $this->pages)); ?>
+					<?php if ($this->page < $this->pages) : ?>
+						<a href="<?php echo S::url('&view=photos&filter=' . $this->filter . $q . '&pagina=' . ($this->page + 1)); ?>" aria-label="<?php echo $t('COM_MIFOTO_A_NEXT'); ?>"><?php echo S::icon('right'); ?></a>
+					<?php else : ?>
+						<span aria-hidden="true"><?php echo S::icon('right'); ?></span>
+					<?php endif; ?>
+				</nav>
+			<?php endif; ?>
+		</section>
 	</div>
 
-	<?php if (!$this->items) : ?>
-		<div class="alert alert-info"><?php echo Text::_('COM_MIFOTO_PHOTOS_EMPTY'); ?></div>
-	<?php else : ?>
-		<table class="table table-striped align-middle">
-			<thead>
-				<tr>
-					<th scope="col" class="w-1"><?php echo Text::_('COM_MIFOTO_PHOTOS_COL_PHOTO'); ?></th>
-					<th scope="col"><?php echo Text::_('COM_MIFOTO_PHOTOS_COL_USER'); ?></th>
-					<th scope="col"><?php echo Text::_('COM_MIFOTO_PHOTOS_COL_STATE'); ?></th>
-					<th scope="col"><?php echo Text::_('COM_MIFOTO_PHOTOS_COL_WEIGHT'); ?></th>
-					<th scope="col"><?php echo Text::_('COM_MIFOTO_PHOTOS_COL_DATE'); ?></th>
-					<?php if ($canMod) : ?><th scope="col"><span class="visually-hidden"><?php echo Text::_('COM_MIFOTO_PHOTOS_COL_ACTIONS'); ?></span></th><?php endif; ?>
-				</tr>
-			</thead>
-			<tbody>
-				<?php foreach ($this->items as $item) : ?>
-					<?php
-					$hidden = (int) $item->state === AccessPolicy::HIDDEN;
-					// Uri::base(true) is the "/administrator" path (starts with a slash), which AvatarRenderer requires.
-					$thumb  = Uri::base(true) . '/' . $base . '&task=photos.image&pkey=' . $item->pkey . '&size=64';
-					$name   = (string) ($item->name ?? '');
-					$user   = (string) ($item->username ?? '');
-					?>
-					<tr>
-						<td>
-							<?php
-							echo AvatarRenderer::html(
-								new \Chaska\Component\Mifoto\Administrator\Service\PhotoData($thumb, 64, 64, 64, ''),
-								$classes,
-								48,
-								Placeholder::initials($name),
-								Placeholder::color($user),
-								$name
-							);
-							?>
-						</td>
-						<td>
-							<strong><?php echo $this->escape($name !== '' ? $name : '—'); ?></strong><br>
-							<span class="small text-muted"><?php echo $this->escape($user); ?></span>
-						</td>
-						<td>
-							<?php if ($hidden) : ?>
-								<span class="badge bg-warning text-dark"><?php echo Text::_('COM_MIFOTO_PHOTOS_STATE_HIDDEN'); ?></span>
-							<?php else : ?>
-								<span class="badge bg-success"><?php echo Text::_('COM_MIFOTO_PHOTOS_STATE_VISIBLE'); ?></span>
-							<?php endif; ?>
-						</td>
-						<td><?php echo (int) round(((int) $item->bytes) / 1024); ?> KB</td>
-						<td><?php echo HTMLHelper::_('date', $item->modified, Text::_('DATE_FORMAT_LC5')); ?></td>
-						<?php if ($canMod) : ?>
-							<td class="text-end text-nowrap">
-								<button type="submit" class="btn btn-sm btn-outline-secondary"
-									formaction="<?php echo $url('&task=photos.' . ($hidden ? 'show' : 'hide') . '&pkey=' . $item->pkey); ?>">
-									<?php echo Text::_($hidden ? 'COM_MIFOTO_PHOTOS_ACTION_SHOW' : 'COM_MIFOTO_PHOTOS_ACTION_HIDE'); ?>
-								</button>
-								<button type="submit" class="btn btn-sm btn-outline-danger"
-									formaction="<?php echo $url('&task=photos.remove&pkey=' . $item->pkey); ?>"
-									onclick="return confirm(<?php echo htmlspecialchars(json_encode(Text::_('COM_MIFOTO_PHOTOS_CONFIRM_REMOVE')), ENT_QUOTES, 'UTF-8'); ?>);">
-									<?php echo Text::_('COM_MIFOTO_PHOTOS_ACTION_REMOVE'); ?>
-								</button>
-							</td>
-						<?php endif; ?>
-					</tr>
-				<?php endforeach; ?>
-			</tbody>
-		</table>
-
-		<?php echo $this->pagination->getListFooter(); ?>
-	<?php endif; ?>
-
-	<input type="hidden" name="task" value="">
-	<?php echo HTMLHelper::_('form.token'); ?>
-</form>
+	<aside class="mfa-col mfa-viewer" aria-label="<?php echo $t('COM_MIFOTO_A_V_ASIDE'); ?>">
+		<section class="mfa-box">
+			<?php if ($u === null) : ?>
+				<p class="mfa-empty"><?php echo $t($this->filter === 'sin' ? 'COM_MIFOTO_A_V_NOPHOTO' : 'COM_MIFOTO_A_V_NONE'); ?></p>
+			<?php else : ?>
+				<?php
+				$hidden = (int) $u->state === AccessPolicy::HIDDEN;
+				$name   = (string) ($u->name !== '' ? $u->name : $u->username);
+				$back   = '&view=photos&filter=' . $this->filter . $q . '&pagina=' . $this->page . '&pkey=' . $u->pkey;
+				?>
+				<div class="mfa-big">
+					<div class="mfa-photo"><img src="<?php echo S::e(S::photoUrl((string) $u->pkey, 300)); ?>" alt="<?php echo S::e($name); ?>" width="220" height="220"></div>
+					<?php if ($this->canModerate) : ?>
+						<div class="mfa-rail">
+							<form action="<?php echo S::url('&task=photos.' . ($hidden ? 'show' : 'hide') . '&pkey=' . $u->pkey); ?>" method="post">
+								<button type="submit" class="mfa-btn mfa-btn-line"><?php echo S::icon($hidden ? 'eye' : 'eyeoff') . $t($hidden ? 'COM_MIFOTO_PHOTOS_ACTION_SHOW' : 'COM_MIFOTO_PHOTOS_ACTION_HIDE'); ?></button>
+								<?php echo HTMLHelper::_('form.token'); ?>
+							</form>
+							<form action="<?php echo S::url('&task=photos.remove&pkey=' . $u->pkey); ?>" method="post"
+								data-confirm="<?php echo $t('COM_MIFOTO_PHOTOS_CONFIRM_REMOVE'); ?>">
+								<button type="submit" class="mfa-btn mfa-btn-danger"><?php echo S::icon('trash') . $t('COM_MIFOTO_PHOTOS_ACTION_REMOVE'); ?></button>
+								<?php echo HTMLHelper::_('form.token'); ?>
+							</form>
+							<a class="mfa-btn mfa-btn-line" href="<?php echo S::e(\Joomla\CMS\Router\Route::_('index.php?option=com_users&task=user.edit&id=' . (int) $u->id, false)); ?>"><?php echo S::icon('user') . $t('COM_MIFOTO_A_V_USER'); ?></a>
+						</div>
+					<?php endif; ?>
+				</div>
+				<h3 class="mfa-vname"><?php echo S::e(Text::sprintf('COM_MIFOTO_A_STICKER_LABEL', (int) $u->id, $name)); ?></h3>
+				<dl class="mfa-meta">
+					<dt><?php echo $t('COM_MIFOTO_A_M_USER'); ?></dt><dd><?php echo S::e((string) $u->username); ?></dd>
+					<dt><?php echo $t('COM_MIFOTO_A_M_UPLOADED'); ?></dt><dd><?php echo S::e(S::ago($u->modified)); ?></dd>
+					<dt><?php echo $t('COM_MIFOTO_A_M_WEIGHT'); ?></dt><dd><?php echo (int) round(((int) $u->bytes) / 1024); ?> KB</dd>
+					<dt><?php echo $t('COM_MIFOTO_A_M_SIZE'); ?></dt><dd><?php echo (int) $u->width; ?> × <?php echo (int) $u->height; ?></dd>
+					<dt><?php echo $t('COM_MIFOTO_A_M_STATE'); ?></dt><dd><?php echo $t($hidden ? 'COM_MIFOTO_PHOTOS_STATE_HIDDEN' : 'COM_MIFOTO_PHOTOS_STATE_VISIBLE'); ?></dd>
+				</dl>
+			<?php endif; ?>
+		</section>
+	</aside>
+</div>
+<?php echo S::close(); ?>
