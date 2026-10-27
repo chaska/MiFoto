@@ -23,6 +23,7 @@ PARTS = {
 	'plg_user_mifoto.zip': SRC / 'plugins' / 'user' / 'mifoto',
 	'plg_content_mifoto.zip': SRC / 'plugins' / 'content' / 'mifoto',
 	'plg_engage_mifoto.zip': SRC / 'plugins' / 'engage' / 'mifoto',
+	'plg_privacy_mifoto.zip': SRC / 'plugins' / 'privacy' / 'mifoto',
 	'mod_mifoto_photo.zip': SRC / 'modules' / 'mifoto_photo',
 }
 

@@ -12,7 +12,7 @@
 	<authorUrl></authorUrl>
 	<copyright>Copyright (c) 2026 ChasKa</copyright>
 	<license>GNU/GPL v3 or any later version</license>
-	<version>0.4.1</version>
+	<version>0.5.0</version>
 	<description>COM_MIFOTO_XML_DESCRIPTION</description>
 	<namespace path="src">Chaska\Component\Mifoto</namespace>
 	<php_minimum>8.1.0</php_minimum>
@@ -31,6 +31,7 @@
 		<submenu>
 			<menu link="option=com_mifoto&amp;view=panel">COM_MIFOTO_MENU_PANEL</menu>
 			<menu link="option=com_mifoto&amp;view=photos">COM_MIFOTO_MENU_PHOTOS</menu>
+			<menu link="option=com_mifoto&amp;view=reports">COM_MIFOTO_MENU_REPORTS</menu>
 			<menu link="option=com_mifoto&amp;view=settings">COM_MIFOTO_MENU_SETTINGS</menu>
 			<menu link="option=com_mifoto&amp;view=permissions">COM_MIFOTO_MENU_PERMISSIONS</menu>
 		</submenu>

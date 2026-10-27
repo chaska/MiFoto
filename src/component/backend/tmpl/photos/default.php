@@ -115,6 +115,15 @@ echo S::open('photos', $tt);
 					<dt><?php echo $t('COM_MIFOTO_A_M_WEIGHT'); ?></dt><dd><?php echo (int) round(((int) $u->bytes) / 1024); ?> KB</dd>
 					<dt><?php echo $t('COM_MIFOTO_A_M_SIZE'); ?></dt><dd><?php echo (int) $u->width; ?> × <?php echo (int) $u->height; ?></dd>
 					<dt><?php echo $t('COM_MIFOTO_A_M_STATE'); ?></dt><dd><?php echo $t($hidden ? 'COM_MIFOTO_PHOTOS_STATE_HIDDEN' : 'COM_MIFOTO_PHOTOS_STATE_VISIBLE'); ?></dd>
+					<dt><?php echo $t('COM_MIFOTO_A_CONSENT'); ?></dt>
+					<dd><?php
+					$c = $this->consent;
+					echo S::e($c === null
+						? Text::_('COM_MIFOTO_A_CONSENT_NONE')
+						: (($c->withdrawn !== null && $c->withdrawn !== '')
+							? Text::sprintf('COM_MIFOTO_A_CONSENT_OUT', S::ago((string) $c->withdrawn))
+							: Text::sprintf('COM_MIFOTO_A_CONSENT_OK', S::ago((string) $c->accepted), (int) $c->version)));
+					?></dd>
 				</dl>
 			<?php endif; ?>
 		</section>

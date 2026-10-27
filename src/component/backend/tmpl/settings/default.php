@@ -92,6 +92,22 @@ echo S::open('settings', $this->totals);
 			</div>
 		</section>
 
+		<section>
+			<h2><?php echo $t('COM_MIFOTO_SET_LEGAL'); ?></h2>
+			<p class="mfa-sub"><?php echo $t('COM_MIFOTO_SET_LEGAL_HELP'); ?></p>
+			<div class="mfa-gap">
+				<?php echo $segmented('lightbox', 'COM_MIFOTO_CONFIG_LIGHTBOX', $cur('lightbox', '1') === '0' ? '0' : '1', ['1' => 'COM_MIFOTO_SET_YES', '0' => 'COM_MIFOTO_SET_NO']); ?>
+				<p class="mfa-sub"><?php echo $t('COM_MIFOTO_CONFIG_LIGHTBOX_DESC'); ?></p>
+			</div>
+			<div class="mfa-grid mfa-gap">
+				<?php
+				echo $field('mifoto-privacy', 'COM_MIFOTO_CONFIG_PRIVACY_URL', 'COM_MIFOTO_CONFIG_PRIVACY_URL_DESC', '<input type="text" id="mifoto-privacy" name="jform[privacy_url]" value="' . S::e($cur('privacy_url', '')) . '" autocomplete="off" spellcheck="false" placeholder="/politica-de-privacidad">');
+				echo $field('mifoto-contact', 'COM_MIFOTO_CONFIG_CONTACT', 'COM_MIFOTO_CONFIG_CONTACT_DESC', '<input type="text" id="mifoto-contact" name="jform[contact]" value="' . S::e($cur('contact', '')) . '" autocomplete="off" spellcheck="false" placeholder="privacidad@tusitio.es">');
+				echo $field('mifoto-where', 'COM_MIFOTO_CONFIG_SHOWN_WHERE', 'COM_MIFOTO_CONFIG_SHOWN_WHERE_DESC', '<input type="text" id="mifoto-where" name="jform[shown_where]" maxlength="200" value="' . S::e($cur('shown_where', '')) . '">');
+				?>
+			</div>
+		</section>
+
 		<div class="mfa-savebar">
 			<button type="submit" class="mfa-btn mfa-btn-gold"><?php echo $t('COM_MIFOTO_SET_SAVE'); ?></button>
 			<span class="mfa-stamp" data-role="dirty" hidden><?php echo $t('COM_MIFOTO_SET_UNSAVED'); ?></span>

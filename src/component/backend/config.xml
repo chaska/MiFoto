@@ -33,6 +33,16 @@
 		</field>
 	</fieldset>
 
+	<fieldset name="legal" label="COM_MIFOTO_CONFIG_LEGAL" description="COM_MIFOTO_CONFIG_LEGAL_DESC">
+		<field name="lightbox" type="radio" default="1" layout="joomla.form.field.radio.switcher" label="COM_MIFOTO_CONFIG_LIGHTBOX" description="COM_MIFOTO_CONFIG_LIGHTBOX_DESC">
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+		<field name="privacy_url" type="text" default="" label="COM_MIFOTO_CONFIG_PRIVACY_URL" description="COM_MIFOTO_CONFIG_PRIVACY_URL_DESC" />
+		<field name="contact" type="text" default="" label="COM_MIFOTO_CONFIG_CONTACT" description="COM_MIFOTO_CONFIG_CONTACT_DESC" />
+		<field name="shown_where" type="text" default="" label="COM_MIFOTO_CONFIG_SHOWN_WHERE" description="COM_MIFOTO_CONFIG_SHOWN_WHERE_DESC" />
+	</fieldset>
+
 	<fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL" description="JCONFIG_PERMISSIONS_DESC">
 		<field name="rules" type="rules" label="JCONFIG_PERMISSIONS_LABEL" filter="rules" validate="rules" component="com_mifoto" section="component" />
 	</fieldset>

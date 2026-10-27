@@ -25,6 +25,13 @@ $chips = [
 ];
 
 echo S::open('panel', $tt);
+
+// Reports waiting for a moderator: said at the top, with the way in.
+$pending = $this->restricted ? 0 : S::openReports();
+
+if ($pending > 0) : ?>
+	<p class="mfa-msg is-error" role="alert"><?php echo S::e($pending === 1 ? Text::_('COM_MIFOTO_A_R_PENDING_1') : Text::sprintf('COM_MIFOTO_A_R_PENDING', $pending)); ?> <a href="<?php echo S::url('&view=reports'); ?>"><?php echo $t('COM_MIFOTO_A_R_REVIEW'); ?></a></p>
+<?php endif;
 ?>
 <div class="mfa-cols">
 	<div class="mfa-col">

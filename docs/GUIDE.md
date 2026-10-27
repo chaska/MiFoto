@@ -7,11 +7,12 @@ Profile photos for Joomla 5 and 6. Each person uploads their photo from their pr
 ## 1. Install
 
 1. Extensions → Manage → Install → upload `pkg_mifoto_<version>.zip` as it is, without unzipping. **To update, install the new ZIP on top, without uninstalling anything**: Joomla keeps the options, the permissions, the photos and which plugins you have enabled.
-2. The package installs one component, three plugins and one module. The three plugins are **switched on automatically the first time** (Joomla installs them disabled, which is why sometimes nothing shows up); afterwards your choice is respected. Check in Extensions → Plugins:
+2. The package installs one component, four plugins and one module. The plugins are **switched on automatically the first time** (Joomla installs them disabled, which is why sometimes nothing shows up); afterwards your choice is respected. Check in Extensions → Plugins:
+   - **Privacy - MiFoto**: adds a person's photo, consents and reports to Joomla's "copy of my data" and "delete my data" requests (Users → Privacy).
    - **User - MiFoto**: puts the photo in the profile and the moderation in the administrator's user edit screen.
    - **Content - MiFoto**: the `{user}` tags in articles and modules.
    - **Engage - MiFoto**: the photo in Akeeba Engage comments (only if you use Engage).
-3. The module **MiFoto - User photo** (Extensions → Modules → New) puts the same upload/crop/change/remove block **wherever you place it**, independent of the template. It is the safe way if your template overrides the "Edit your profile" page and the block does not appear inside the form (see section 9). Assign it to that page and the position you want. Do not use it together with the block inside the form: it would appear twice.
+3. The module **MiFoto - User photo** (Extensions → Modules → New) puts the same upload/crop/change/remove block **wherever you place it**, independent of the template. It is the safe way if your template overrides the "Edit your profile" page and the block does not appear inside the form (see section 10). Assign it to that page and the position you want. Do not use it together with the block inside the form: it would appear twice.
 4. Components → MiFoto → **Permissions** tab. Permissions start unassigned, so no normal user can upload or view photos until you grant them. **They are granted with one click**: press the box for the group and the permission (Upload, View, Moderate); it is saved immediately in Joomla's permissions and you can undo it. A box with a thin stroke means the group already has it because it inherits it from a group above; Super Users can always do everything. If something is denied on purpose, change it under "Advanced Joomla permissions" (button on that screen):
 
 | Permission | What it is for | Usually given to |
@@ -36,6 +37,8 @@ Components → MiFoto → **Settings** tab. They are saved through Joomla's own 
 - **Uploads per hour and person**: attempts allowed per hour (failed ones count too). `0` = unlimited.
 - **Crop before upload**: the user chooses which part of the photo is kept.
 - **Style**: shape (round, square, soft corners), frame (none, thin, thick) and shadow. Applied to every photo on the site, always the same; it is only the look, the image does not change.
+- **Allow enlarging the profile photo**: clicking a person's photo, anywhere on the site (comments, the map, modules…), opens it bigger. The stored photo is 300 px at most, so it is not enlarged beyond that. It works with any extension that shows MiFoto photos, without touching them.
+- **Privacy policy**, **Contact to remove photos** and **Where the photo will be seen**: the texts of the notice the person sees when uploading (section 4). Set the address of your privacy policy: the Panel warns you if it is missing.
 
 ## 3. What each person sees
 
@@ -43,16 +46,34 @@ Components → MiFoto → **Settings** tab. They are saved through Joomla's own 
 
 **You**, on opening Components → MiFoto, see the **album**: the cover says how many users already have a photo, with a bar of one block per user; below, each user is a numbered sticker (with their photo) or a dotted slot if they have not uploaded one yet. On the right, the installation **status** ("All in order", or what is missing, with a button to fix it) and a summary of who can do what.
 
-In the **Photos** tab you see all of them with search and filters (All, Visible, Hidden, Without photo). Clicking a sticker shows it large on the right, with the buttons *Hide* (only the owner and moderators see it) or *Show*, *Remove* and *View user*. The same is available, without leaving the page, in each user's edit screen in the administrator ("Profile photo" tab). A moderator cannot upload a photo on someone else's behalf: only the owner can.
+In the **Photos** tab you see all of them with search and filters (All, Visible, Hidden, Without photo). The **Reports** tab lists what people have reported (section 4). Clicking a sticker shows it large on the right, with its details (including the consent) and the buttons *Hide* (only the owner and moderators see it) or *Show*, *Remove* and *View user*. The same is available, without leaving the page, in each user's edit screen in the administrator ("Profile photo" tab). A moderator cannot upload a photo on someone else's behalf: only the owner can.
 
-## 4. How the photo is stored
+## 4. Legal notice, consent, reports and removal
+
+> The texts are a technical starting point, **not legal advice**: have your legal adviser review them and set your privacy policy in Settings.
+
+**When uploading**, before the photo can be chosen, the person sees:
+- A notice of **who will see the photo** (any visitor, only logged-in people, or only whom you allow: worked out from the real permissions) and **where** (the phrase you set in Settings, or a general one).
+- That MiFoto **sets no cookies of its own** (only Joomla's session cookie that keeps the login).
+- **Two required boxes**: a declaration that they are the person in the photo, or its author, with the right to publish it; and their express consent for the photo to be processed and shown as the notice says (GDPR), with a link to the privacy policy. Without both, the button opens nothing and the server refuses the upload.
+- If you set a contact, how to ask for a photo to be removed when someone appears without permission.
+
+**It is recorded**: for every upload MiFoto stores who accepted, when, which version of the text and for which photo. No IP address or browser is stored. If the person removes their photo, the record is marked *withdrawn*; it is deleted with their account. You see it in Photos, in each photo's details ("Consent"). Photos uploaded before 0.5.0 show "No record": a consent that was never asked cannot be invented; ask people to upload them again if you want one.
+
+**Reporting**: when a photo is enlarged, any logged-in person who can see it has the link *Report this photo* (reason and optional comment). You cannot report your own photo, nor the same one twice while the first report is open; there is a limit of 10 a day per person, and only a photo that the reporter can see can be reported. People without an account use the contact in the notice.
+
+**Reviewing**: the **Reports** tab (with the number of open ones) and a notice in the Panel. For each report: *Hide the photo and close*, *Remove the photo and close* or *Dismiss*. Hiding or removing closes all open reports about that photo. No e-mail is sent: reports are seen in the Panel.
+
+**Removal**: the person removes their photo whenever they want from their profile; a moderator can remove it from Photos or Reports; and the **Privacy - MiFoto** plugin connects to Joomla's Users → Privacy: an *export* request includes that person's MiFoto data and a *remove* request deletes their photo, consents and reports. Deleting an account also deletes all of it.
+
+## 5. How the photo is stored
 
 - It is identified by its real content, not by name or extension. Files that are not photos, files that hide code and "bombs" (images tiny in bytes but huge in pixels) are rejected.
 - It is redrawn entirely: nothing of the original survives (no camera data, no GPS, nothing embedded).
 - It is stored as WebP, with the long side at 300 px, without distortion and without enlarging. Copies at 128, 64 and 32 px are also made.
 - The file name is random and changes on every upload; the public address uses a random key, never the user number.
 
-## 5. `{user}` tags (content plugin)
+## 6. `{user}` tags (content plugin)
 
 Written in the text of an article or module:
 
@@ -67,7 +88,7 @@ Sizes from 16 to 300; without `size=` the plugin option default is used. With `{
 
 > If you use Joomla page cache, `{user}` (the reader's photo) may be repeated between visitors. For those pages use `{user 42}` or disable the cache on them.
 
-## 6. Akeeba Engage
+## 7. Akeeba Engage
 
 With "Engage - MiFoto" enabled, comments use the MiFoto photo. Two things:
 
@@ -75,11 +96,11 @@ With "Engage - MiFoto" enabled, comments use the MiFoto photo. Two things:
 - For **visitors who are not logged in** to see the photo, "Engage - MiFoto" must be enabled with **Access = Public** (see section 1). It only gives the photo on live pages, never in e-mails or shared caches (Engage 3.4.13 or later says so with a `page`, `email` or `static` context).
 - If you chose an "avatar field" for users in Engage's options, Engage looks at it before the plugins and that field wins.
 
-## 7. The map
+## 8. The map
 
 The map (Travel map component) uses the photos automatically if MiFoto is installed: on the podium and in the ranking they replace the coloured initial. Without MiFoto, or for someone without a photo, nothing changes. It respects the "View other people's photos" permission.
 
-## 8. For programming another extension
+## 9. For programming another extension
 
 ```php
 $service = \Joomla\CMS\Factory::getApplication()->bootComponent('com_mifoto')->getPhotoService();
@@ -96,7 +117,7 @@ $html   = $service->avatarHtml($userId, 64, null, 'Marta');   // <img> or initia
 - Joomla permissions: `$user->authorise('mifoto.view', 'com_mifoto')`, `mifoto.upload`, `mifoto.moderate`.
 - The photo address needs the visitor's session (it belongs to the site itself and browsers do not let other sites embed it). It does not work for emails or for linking from outside.
 
-## 9. If something does not work
+## 10. If something does not work
 
 | Symptom | What to check |
 |---|---|
@@ -110,6 +131,6 @@ $html   = $service->avatarHtml($userId, 64, null, 'Marta');   // <img> or initia
 
 A photo you hide, or whose group loses the permission, may still show in the browser of someone who already has it for up to 10 minutes (the cache time; changed in Settings). The photo of a blocked user stops being served.
 
-## 10. Uninstall
+## 11. Uninstall
 
-Uninstalling the package **does not delete data**: the MiFoto tables and the photos in `images/MiFoto` stay, so if you install it again everything is still there. What is lost on uninstall are the options (shape, limits…) and the permissions, because Joomla deletes the extension; set them again. To delete everything for real: remove the tables `#__mifoto_photos` and `#__mifoto_limits` and the folder `images/MiFoto` by hand.
+Uninstalling the package **does not delete data**: the MiFoto tables and the photos in `images/MiFoto` stay, so if you install it again everything is still there. What is lost on uninstall are the options (shape, limits…) and the permissions, because Joomla deletes the extension; set them again. To delete everything for real: remove the tables `#__mifoto_photos`, `#__mifoto_limits`, `#__mifoto_consents` and `#__mifoto_reports` and the folder `images/MiFoto` by hand.

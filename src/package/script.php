@@ -33,6 +33,8 @@ return new class () implements InstallerScriptInterface {
 
 	private const FIRST_VERSION_WITH_ACCESS = '0.4.1';
 
+	private const FIRST_VERSION_WITH_PRIVACY = '0.5.0';
+
 	private const PUBLIC_LEVEL = 1;
 
 	private const REGISTERED_LEVEL = 2;
@@ -84,23 +86,27 @@ return new class () implements InstallerScriptInterface {
 		$fixAccess = $type === 'install'
 			|| ($type === 'update' && $this->previous !== '' && version_compare($this->previous, self::FIRST_VERSION_WITH_ACCESS, '<'));
 
-		if (!$firstTime && !$fixAccess)
+		// The privacy plugin (export / delete a person's data from Users > Privacy) arrives with 0.5.0: switched on once.
+		$privacy = $type === 'update' && $this->previous !== '' && version_compare($this->previous, self::FIRST_VERSION_WITH_PRIVACY, '<');
+
+		if (!$firstTime && !$fixAccess && !$privacy)
 		{
 			return true;
 		}
 
 		try
 		{
-			$db = Factory::getContainer()->get(DatabaseInterface::class);
+			$db      = Factory::getContainer()->get(DatabaseInterface::class);
+			$folders = $firstTime ? ['user', 'content', 'engage', 'privacy'] : ($privacy ? ['privacy'] : []);
 
-			if ($firstTime)
+			if ($folders !== [])
 			{
 				$query = $db->getQuery(true)
 					->update($db->quoteName('#__extensions'))
 					->set($db->quoteName('enabled') . ' = 1')
 					->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
 					->where($db->quoteName('element') . ' = ' . $db->quote('mifoto'))
-					->whereIn($db->quoteName('folder'), ['user', 'content', 'engage'], ParameterType::STRING);
+					->whereIn($db->quoteName('folder'), $folders, ParameterType::STRING);
 				$db->setQuery($query)->execute();
 			}
 
