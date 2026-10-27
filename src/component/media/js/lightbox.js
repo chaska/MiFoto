@@ -198,7 +198,7 @@
 		parts.img.src = bigUrl(img);
 		parts.status.textContent = '';
 		parts.form.hidden = true;
-		parts.report.hidden = !o.reportUrl;
+		parts.report.hidden = !o.reportUrl || !o.loggedIn;
 		contactLine(o);
 		dlg.showModal();
 

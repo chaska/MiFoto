@@ -62,6 +62,8 @@ afirma(str_contains($w, 'Access::checkGroup(1,'), 'quien lo vera se calcula con 
 $js = (string) file_get_contents($src . 'component/media/js/widget.js');
 afirma(str_contains($js, '!consentGiven()') && str_contains($js, "fd.append('consent_owner', '1')"), 'el boton de elegir foto no abre nada sin las dos casillas y se envian con la foto');
 
+afirma(str_contains((string) file_get_contents($src . 'component/media/js/lightbox.js'), 'parts.report.hidden = !o.reportUrl || !o.loggedIn'), 'el enlace Denunciar solo aparece si hay sesion iniciada (y el servidor tambien lo exige)');
+
 seccion('Idiomas: mismas claves en es-ES y en-GB, y todo lo que usa el codigo existe');
 $keys = static function (string $file): array {
 	$out = [];
