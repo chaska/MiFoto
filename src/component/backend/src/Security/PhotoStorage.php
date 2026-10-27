@@ -76,7 +76,7 @@ final class PhotoStorage
 	 * Moves a verified temporary WebP to <user id>/<token>-300.webp, makes the smaller sizes, and removes the user's previous
 	 * photo. Returns the new token.
 	 */
-	public function commit(string $temporary, int $userId): string
+	public function commit(string $temporary, int $userId, bool $dropOld = true): string
 	{
 		if ($userId < 1)
 		{
@@ -119,8 +119,11 @@ final class PhotoStorage
 			throw new \RuntimeException('storage');
 		}
 
-		// Only now, with the new photo complete, the old one goes.
-		$this->deleteUser($userId, $token);
+		// Only now, with the new photo complete, the old one goes (unless the caller drops it after saving the database row).
+		if ($dropOld)
+		{
+			$this->deleteUser($userId, $token);
+		}
 
 		return $token;
 	}

@@ -130,10 +130,9 @@ final class AdminData
 		{
 			// "%" and "_" typed by the moderator are literal characters, not wildcards.
 			$like = '%' . addcslashes(mb_substr($search, 0, 100), '%_\\') . '%';
-			$query->where('(' . $db->quoteName('u.name') . ' LIKE :s1 OR ' . $db->quoteName('u.username') . ' LIKE :s2 OR ' . $db->quoteName('u.email') . ' LIKE :s3)')
+			$query->where('(' . $db->quoteName('u.name') . ' LIKE :s1 OR ' . $db->quoteName('u.username') . ' LIKE :s2)')
 				->bind(':s1', $like)
-				->bind(':s2', $like)
-				->bind(':s3', $like);
+				->bind(':s2', $like);
 		}
 
 		return $query;

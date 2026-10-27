@@ -57,7 +57,9 @@ echo S::open('panel', $tt);
 				<?php endforeach; ?>
 			</nav>
 
-			<?php if (!$this->album) : ?>
+			<?php if ($this->restricted) : ?>
+				<p class="mfa-empty"><?php echo $t('COM_MIFOTO_A_RESTRICTED'); ?></p>
+			<?php elseif (!$this->album) : ?>
 				<p class="mfa-empty"><?php echo $t('COM_MIFOTO_A_EMPTY_FILTER'); ?></p>
 			<?php else : ?>
 				<div class="mfa-album">

@@ -60,6 +60,19 @@ final class Segments
 			$on  = $blocks - $hid;
 		}
 
+		// Somebody is still without a photo: rounding must not make the strip look full (999 of 1000 is not "everybody").
+		if ($visible + $hidden < $users && $on + $hid >= $blocks)
+		{
+			if ($on >= $hid)
+			{
+				$on--;
+			}
+			else
+			{
+				$hid--;
+			}
+		}
+
 		return array_merge(array_fill(0, $on, self::ON), array_fill(0, $hid, self::HIDDEN), array_fill(0, $blocks - $on - $hid, self::MISSING));
 	}
 }

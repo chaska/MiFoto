@@ -22,11 +22,16 @@ Profile photos for Joomla 5 and 6. Each person uploads their photo from their pr
 
 Super User can always do everything.
 
+> **For visitors who are not logged in to see the photos, three things are needed at once:**
+> 1. The "View other people's photos" permission for the **Public** group.
+> 2. The photo is in the **visible** state (not hidden).
+> 3. The plugin that draws it has **Access = Public** in Extensions → Plugins: "Engage - MiFoto" for comments and "Content - MiFoto" for `{user}`. Joomla only loads a plugin for people whose access level matches, so with "Registered" visitors see nothing even if the other two are right. The installer sets them to Public, and the Panel and Settings warn you if they are not.
+
 ## 2. Settings
 
 Components → MiFoto → **Settings** tab. They are saved through Joomla's own save (with its permission check).
 
-- **Folder**: where photos are stored (default `images/MiFoto`). It is closed to direct access: photos are only served through the component, which checks the permission on every request.
+- **Folder**: where photos are stored (default `images/MiFoto`; it must be inside `images/`). It is closed to direct access with a protection file (`.htaccess` and `web.config`): photos are only served through the component, which checks the permission on every request. If your server is **nginx**, that file is not honoured: block the folder in the server configuration (the Panel warns you).
 - **Maximum upload size**: what is rejected before processing. The stored photo weighs far less.
 - **Uploads per hour and person**: attempts allowed per hour (failed ones count too). `0` = unlimited.
 - **Crop before upload**: the user chooses which part of the photo is kept.
@@ -58,7 +63,7 @@ Written in the text of an article or module:
 | `{user size=96}` | The reader's, at 96 px |
 | `{user 42 size=96}` | User 42's, at 96 px |
 
-Sizes from 16 to 300; without `size=` the plugin option default is used. If the person has no photo, their initials are shown. If the reader has no permission to view photos, nothing is shown.
+Sizes from 16 to 300; without `size=` the plugin option default is used. With `{user}` (your own) and no photo, your initials are shown. With `{user 42}` the photo only appears if that person has one, it is visible and the reader may see it; otherwise nothing is shown (so nobody can discover user numbers).
 
 > If you use Joomla page cache, `{user}` (the reader's photo) may be repeated between visitors. For those pages use `{user 42}` or disable the cache on them.
 
@@ -67,6 +72,7 @@ Sizes from 16 to 300; without `size=` the plugin option default is used. If the 
 With "Engage - MiFoto" enabled, comments use the MiFoto photo. Two things:
 
 - Engage takes the first address the plugins give it. "Engage - Gravatar" always answers with a generic avatar, so put **Engage - MiFoto before Engage - Gravatar** in Extensions → Plugins (sort by order). The next Engage version (3.4.12) will make a real photo always win over the generic avatar.
+- For **visitors who are not logged in** to see the photo, "Engage - MiFoto" must be enabled with **Access = Public** (see section 1). It only gives the photo on live pages, never in e-mails or shared caches (Engage 3.4.13 or later says so with a `page`, `email` or `static` context).
 - If you chose an "avatar field" for users in Engage's options, Engage looks at it before the plugins and that field wins.
 
 ## 7. The map
@@ -96,10 +102,13 @@ $html   = $service->avatarHtml($userId, 64, null, 'Marta');   // <img> or initia
 |---|---|
 | The block does not appear in the profile | 1) Is "User - MiFoto" enabled? 2) If the "Edit your profile" page is customised (template with an override in `html/com_users/profile/edit.php`), many templates only print the basic fields and skip the ones plugins add. Two solutions: use the **module** "MiFoto - User photo" (section 1), or in that `edit.php` add, just before the Save and Cancel buttons: `<?php foreach ($this->form->getFieldsets() as $fieldset) : ?><?php if ($fieldset->name === 'core') { continue; } ?><?php echo $this->form->renderFieldset($fieldset->name); ?><?php endforeach; ?>` |
 | "Your group cannot upload a photo" | The "Upload" box for your group in the Permissions tab |
+| Visitors who are not logged in see no photos | The three things in section 1: View permission for Public, visible photo and plugin with Access = Public |
 | Uploads fine but others do not see it | The "View other people's photos" permission, and that the photo is not hidden in Photos |
 | "The server cannot process photos" | The PHP **GD with WebP** extension is missing on the hosting |
 | "Too many attempts in the last hour" | The "Uploads per hour and person" setting |
 | Comments show the generic avatar | Plugin order: MiFoto before Gravatar |
+
+A photo you hide, or whose group loses the permission, may still show in the browser of someone who already has it for up to 10 minutes (the cache time; changed in Settings). The photo of a blocked user stops being served.
 
 ## 10. Uninstall
 

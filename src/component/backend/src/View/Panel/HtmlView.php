@@ -42,6 +42,9 @@ final class HtmlView extends BaseHtmlView
 	/** @var array<int, array{id: int, title: string, level: int, cells: array<string, string>}> */
 	public array $matrix = [];
 
+	/** True when this person may open the component but not moderate: they get the numbers, not the people. */
+	public bool $restricted = false;
+
 	public string $filter = 'todos';
 
 	public int $page = 1;
@@ -63,8 +66,15 @@ final class HtmlView extends BaseHtmlView
 		$total       = $data->count($this->filter);
 		$this->pages = max(1, (int) ceil($total / self::PER_PAGE));
 		$this->page  = max(1, min($this->pages, (int) $input->getInt('pagina', 1)));
-		$this->album = $data->album($this->filter, ($this->page - 1) * self::PER_PAGE, self::PER_PAGE);
-		$this->recent = $data->recent(6);
+		$this->restricted = !$app->getIdentity()->authorise('mifoto.moderate', 'com_mifoto');
+
+		// Names and usernames of everybody are for moderators only; the totals are not personal data.
+		if (!$this->restricted)
+		{
+			$this->album  = $data->album($this->filter, ($this->page - 1) * self::PER_PAGE, self::PER_PAGE);
+			$this->recent = $data->recent(6);
+		}
+
 		$this->health = Health::run($db, $service);
 
 		$store  = new PermissionStore($db);

@@ -56,6 +56,14 @@ final class Health
 			? self::item('warn', 'COM_MIFOTO_A_H_PLUGINS', 'COM_MIFOTO_A_H_PLUGINS_BAD', 'index.php?option=com_plugins&view=plugins&filter[search]=mifoto', 'COM_MIFOTO_A_H_FIX')
 			: self::item('ok', 'COM_MIFOTO_A_H_PLUGINS', 'COM_MIFOTO_A_H_PLUGINS_D', '', '', $count . ' / 3');
 
+		// 1b. can visitors see the photos in Engage comments? (the plugin must be on AND open to Public)
+		$engage = self::engage($db);
+
+		if ($engage !== null)
+		{
+			$items[] = $engage;
+		}
+
 		// 2. can the server make WebP?
 		$items[] = ImageProcessor::isSupported()
 			? self::item('ok', 'COM_MIFOTO_A_H_WEBP', 'COM_MIFOTO_A_H_WEBP_D', '', '', Text::_('COM_MIFOTO_A_H_YES'))
@@ -67,6 +75,11 @@ final class Health
 		if (!is_dir($root))
 		{
 			$items[] = self::item('info', 'COM_MIFOTO_A_H_FOLDER', 'COM_MIFOTO_A_H_FOLDER_NEW');
+		}
+		elseif (stripos((string) ($_SERVER['SERVER_SOFTWARE'] ?? ''), 'nginx') !== false)
+		{
+			// nginx ignores .htaccess: the files could be fetched directly unless the server configuration blocks the folder.
+			$items[] = self::item('warn', 'COM_MIFOTO_A_H_FOLDER', 'COM_MIFOTO_A_H_FOLDER_NGINX');
 		}
 		elseif (is_file($root . '/.htaccess') || is_file($root . '/web.config'))
 		{
@@ -106,6 +119,39 @@ final class Health
 			: self::item('info', 'COM_MIFOTO_A_H_MODULE', 'COM_MIFOTO_A_H_MODULE_D', 'index.php?option=com_modules&view=select&client_id=0', 'COM_MIFOTO_A_H_PLACE');
 
 		return ['items' => $items, 'warnings' => \count(array_filter($items, static fn (array $i): bool => $i['status'] === 'warn'))];
+	}
+
+	/**
+	 * Joomla loads a plugin only for people whose access level matches the plugin's. If "Engage - MiFoto" is off or is not Public,
+	 * visitors without a session get no photo in the comments. Null when the plugin is not installed at all.
+	 *
+	 * @return array{status: string, title: string, detail: string, url: string, action: string}|null
+	 */
+	public static function engage(DatabaseInterface $db): ?array
+	{
+		try
+		{
+			$query = $db->getQuery(true)
+				->select($db->quoteName(['enabled', 'access']))
+				->from($db->quoteName('#__extensions'))
+				->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+				->where($db->quoteName('element') . ' = ' . $db->quote('mifoto'))
+				->where($db->quoteName('folder') . ' = ' . $db->quote('engage'));
+			$row = $db->setQuery($query)->loadAssoc();
+		}
+		catch (\Throwable $e)
+		{
+			return null;
+		}
+
+		if (!\is_array($row))
+		{
+			return null;
+		}
+
+		return ((int) $row['enabled'] === 1 && (int) $row['access'] === 1)
+			? self::item('ok', 'COM_MIFOTO_A_H_ENGAGE', 'COM_MIFOTO_A_H_ENGAGE_D', '', '', Text::_('COM_MIFOTO_A_H_YES'))
+			: self::item('warn', 'COM_MIFOTO_A_H_ENGAGE', 'COM_MIFOTO_A_H_ENGAGE_BAD', 'index.php?option=com_plugins&view=plugins&filter[search]=mifoto', 'COM_MIFOTO_A_H_FIX');
 	}
 
 	/** @return array{status: string, title: string, detail: string, url: string, action: string} */

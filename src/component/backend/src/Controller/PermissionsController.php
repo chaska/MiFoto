@@ -43,15 +43,17 @@ final class PermissionsController extends BaseController
 		$store  = new PermissionStore(Factory::getContainer()->get(DatabaseInterface::class));
 		$groups = $store->groups();
 		$fixed  = $store->fixed($groups);
-		$result = PermissionMatrix::toggle($groups, $store->rules(), $fixed, $group, $action);
+		// The change is worked out INSIDE the locked save, from the rules as they are at that moment.
+		$done   = $store->mutate(static fn (array $rules): array => PermissionMatrix::toggle($groups, $rules, $fixed, $group, $action));
+		$result = $done['result'];
 
-		if (!$result['ok'])
+		if (!$done['saved'])
 		{
-			$this->json(['ok' => false, 'message' => Text::_($result['reason'] === 'denied' ? 'COM_MIFOTO_A_ERR_DENIED' : 'COM_MIFOTO_A_ERR_SAVE'), 'rows' => PermissionMatrix::rows($groups, $store->rules(), $fixed)], 422);
-		}
+			if (isset($result['reason']) && $result['reason'] !== 'save')
+			{
+				$this->json(['ok' => false, 'message' => Text::_($result['reason'] === 'denied' ? 'COM_MIFOTO_A_ERR_DENIED' : 'COM_MIFOTO_A_ERR_SAVE'), 'rows' => PermissionMatrix::rows($groups, $store->rules(), $fixed)], 422);
+			}
 
-		if (!$store->save($result['rules']))
-		{
 			$this->json(['ok' => false, 'message' => Text::_('COM_MIFOTO_A_ERR_SAVE')], 500);
 		}
 

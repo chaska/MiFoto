@@ -184,7 +184,7 @@ final class PhotoService
 		try
 		{
 			$info  = $this->settings->processor()->process($file, $tmp);
-			$token = $storage->commit($tmp, $ownerId);
+			$token = $storage->commit($tmp, $ownerId, false);
 		}
 		catch (SanitizeException $e)
 		{
@@ -201,34 +201,20 @@ final class PhotoService
 
 		$now = Factory::getDate()->toSql();
 
-		if ($existing === null)
+		try
 		{
-			$row = (object) [
-				'user_id'  => $ownerId,
-				'pkey'     => bin2hex(random_bytes(8)),
-				'token'    => $token,
-				'width'    => $info['width'],
-				'height'   => $info['height'],
-				'bytes'    => $info['bytes'],
-				'state'    => AccessPolicy::VISIBLE,
-				'created'  => $now,
-				'modified' => $now,
-			];
-			$this->db->insertObject('#__mifoto_photos', $row);
+			$this->saveRow($ownerId, $existing, $token, $info, $now);
 		}
-		else
+		catch (\Throwable $e)
 		{
-			$row = (object) [
-				'user_id'  => $ownerId,
-				'token'    => $token,
-				'width'    => $info['width'],
-				'height'   => $info['height'],
-				'bytes'    => $info['bytes'],
-				'modified' => $now,
-			];
-			$this->db->updateObject('#__mifoto_photos', $row, 'user_id');
-			$row->pkey = (string) $existing->pkey;
+			// The row still points at the old photo, which has not been deleted yet: only the new files go, so nothing breaks.
+			$storage->deleteToken($ownerId, $token);
+
+			throw new SanitizeException('image_server');
 		}
+
+		// The row now points at the new photo: the old files can go.
+		$storage->deleteUser($ownerId, $token);
 
 		$photo = $this->getPhoto($ownerId, 300, $actor);
 
@@ -349,9 +335,11 @@ final class PhotoService
 		}
 
 		$query = $this->db->getQuery(true)
-			->select('*')
-			->from($this->db->quoteName('#__mifoto_photos'))
-			->where($this->db->quoteName('pkey') . ' = :k')
+			->select($this->db->quoteName('p') . '.*')
+			->from($this->db->quoteName('#__mifoto_photos', 'p'))
+			->join('INNER', $this->db->quoteName('#__users', 'u') . ' ON ' . $this->db->quoteName('u.id') . ' = ' . $this->db->quoteName('p.user_id'))
+			->where($this->db->quoteName('p.pkey') . ' = :k')
+			->where($this->db->quoteName('u.block') . ' = 0')
 			->bind(':k', $pkey);
 
 		$row = $this->db->setQuery($query)->loadObject();
@@ -384,6 +372,13 @@ final class PhotoService
 		$viewer = $viewer ?? Factory::getApplication()->getIdentity();
 		$row    = $this->rowFor($ownerId);
 
+		// Somebody else's initials would reveal that the account exists (and, with hidden photos, which are hidden): only a real,
+		// visible photo of another person is ever shown. A person without a photo sees their own initials.
+		if ($row === null && $viewer->id !== $ownerId)
+		{
+			return '';
+		}
+
 		if (!$this->viewerMaySee($viewer, $ownerId, $row !== null ? (int) $row->state : AccessPolicy::VISIBLE))
 		{
 			return '';
@@ -407,6 +402,50 @@ final class PhotoService
 			Placeholder::color((string) $owner->username),
 			$alt
 		);
+	}
+
+	/**
+	 * Inserts or updates the person's row. Two uploads at the very same moment both see "no row yet": the second insert fails on the
+	 * primary key, so it is retried as an update (the last upload wins, nothing is left half done).
+	 *
+	 * @param   array{width: int, height: int, bytes: int}  $info
+	 */
+	private function saveRow(int $ownerId, ?\stdClass $existing, string $token, array $info, string $now): void
+	{
+		if ($existing === null)
+		{
+			$row = (object) [
+				'user_id'  => $ownerId,
+				'pkey'     => bin2hex(random_bytes(8)),
+				'token'    => $token,
+				'width'    => $info['width'],
+				'height'   => $info['height'],
+				'bytes'    => $info['bytes'],
+				'state'    => AccessPolicy::VISIBLE,
+				'created'  => $now,
+				'modified' => $now,
+			];
+
+			try
+			{
+				$this->db->insertObject('#__mifoto_photos', $row);
+
+				return;
+			}
+			catch (\Throwable $e)
+			{
+				// Somebody else inserted it a moment ago: fall through to the update (if the row is still missing, this throws again).
+			}
+		}
+
+		$this->db->updateObject('#__mifoto_photos', (object) [
+			'user_id'  => $ownerId,
+			'token'    => $token,
+			'width'    => $info['width'],
+			'height'   => $info['height'],
+			'bytes'    => $info['bytes'],
+			'modified' => $now,
+		], 'user_id');
 	}
 
 	/**

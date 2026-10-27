@@ -45,6 +45,9 @@ $sample = static fn (string $extra, string $text = ''): string => '<span class="
 
 echo S::open('settings', $this->totals);
 ?>
+<?php if ($this->engage) : ?>
+	<p class="mfa-msg is-error" role="alert"><?php echo S::e($this->engage['detail']); ?> <a href="<?php echo S::e($this->engage['url']); ?>"><?php echo $t('COM_MIFOTO_A_H_ENGAGE_LINK'); ?></a></p>
+<?php endif; ?>
 <?php if (!$this->canEdit) : ?>
 	<p class="mfa-empty"><?php echo $t('COM_MIFOTO_SET_NO_RIGHTS'); ?></p>
 <?php else : ?>

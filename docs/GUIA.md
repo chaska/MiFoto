@@ -20,11 +20,16 @@ Fotos de perfil para Joomla 5 y 6. Cada persona sube su foto desde su perfil; t�
 
 El Super Usuario lo puede todo siempre.
 
+> **Para que los visitantes sin sesión vean las fotos hacen falta tres cosas a la vez:**
+> 1. El permiso «Ver fotos de otros» para el grupo **Public**.
+> 2. Que la foto esté en estado **visible** (no oculta).
+> 3. Que el plugin que las pinta tenga **Acceso = Public** en Extensiones → Plugins: «Engage - MiFoto» para los comentarios y «Contenido - MiFoto» para `{user}`. Joomla solo carga un plugin para quien tenga su nivel de acceso: con «Registered», los visitantes no ven nada aunque las otras dos estén bien. El instalador los deja en Public, y el Panel y Ajustes te avisan si no lo están.
+
 ## 2. Ajustes
 
 Componentes → MiFoto → pestaña **Ajustes**. Se guardan con el guardado de Joomla (con su comprobación de permisos).
 
-- **Carpeta**: dónde se guardan (por defecto `images/MiFoto`). Queda cerrada al acceso directo: las fotos solo salen por el componente, que comprueba el permiso en cada petición.
+- **Carpeta**: dónde se guardan (por defecto `images/MiFoto`; tiene que colgar de `images/`). Queda cerrada al acceso directo con un archivo de protección (`.htaccess` y `web.config`): las fotos solo salen por el componente, que comprueba el permiso en cada petición. Si tu servidor es **nginx**, ese archivo no se respeta: bloquea la carpeta en la configuración del servidor (el Panel te avisa).
 - **Peso máximo de la subida**: lo que se rechaza antes de procesar. La foto guardada pesa mucho menos.
 - **Subidas por hora y persona**: intentos permitidos por hora (cuentan también los fallidos). `0` = sin límite.
 - **Recorte antes de subir**: el usuario elige qué parte de la foto se queda.
@@ -56,7 +61,7 @@ Se escriben en el texto de un artículo o un módulo:
 | `{user size=96}` | La del lector a 96 px |
 | `{user 42 size=96}` | La del usuario 42 a 96 px |
 
-Tamaños de 16 a 300; sin `size=` se usa el de las opciones del plugin. Si la persona no tiene foto salen sus iniciales. Si quien lee no tiene permiso de ver fotos, no sale nada.
+Tamaños de 16 a 300; sin `size=` se usa el de las opciones del plugin. Con `{user}` (la tuya) sin foto salen tus iniciales. Con `{user 42}` solo sale la foto de esa persona si la tiene, es visible y quien lee puede verla; si no, no sale nada (así no se pueden descubrir números de usuario).
 
 > Si usas la caché de páginas de Joomla, `{user}` (la foto del lector) puede repetirse entre visitantes. Para esas páginas usa `{user 42}` o desactiva la caché en ellas.
 
@@ -65,6 +70,7 @@ Tamaños de 16 a 300; sin `size=` se usa el de las opciones del plugin. Si la pe
 Con «Engage - MiFoto» activado, los comentarios usan la foto de MiFoto. Dos cosas:
 
 - Engage coge la primera dirección que le dan los plugins. «Engage - Gravatar» siempre responde con un avatar genérico, así que pon **Engage - MiFoto antes que Engage - Gravatar** en Extensiones → Plugins (ordenar por orden). La próxima versión de Engage (3.4.12) hará que una foto real gane siempre al avatar genérico.
+- Para que **los visitantes sin sesión** vean la foto, «Engage - MiFoto» tiene que estar activado y con **Acceso = Public** (ver el apartado 1). Solo da la foto en páginas vivas, no en correos ni en cachés compartidas (Engage 3.4.13 o posterior lo indica con un contexto `page`, `email` o `static`).
 - Si en las opciones de Engage tienes elegido un «campo de avatar» de usuario, Engage lo mira antes que a los plugins y gana ese campo.
 
 ## 7. El mapa
@@ -94,10 +100,13 @@ $html   = $service->avatarHtml($userId, 64, null, 'Marta');   // <img> o inicial
 |---|---|
 | No sale el bloque en el perfil | 1) ¿Está activado «Usuario - MiFoto»? 2) Si la página «Edite su perfil» está personalizada (plantilla con override en `html/com_users/profile/edit.php`), muchas plantillas solo pintan los campos básicos y se saltan los que añaden los plugins. Dos soluciones: usa el **módulo** «MiFoto - Foto del usuario» (apartado 1), o en ese `edit.php` añade, justo antes de los botones Guardar y Cancelar: `<?php foreach ($this->form->getFieldsets() as $fieldset) : ?><?php if ($fieldset->name === 'core') { continue; } ?><?php echo $this->form->renderFieldset($fieldset->name); ?><?php endforeach; ?>` |
 | «Tu grupo no puede subir foto» | La casilla «Subir» de tu grupo en la pestaña Permisos |
+| Los visitantes sin sesión no ven ninguna foto | Las tres cosas del apartado 1: permiso «Ver» para Public, foto visible y plugin con Acceso = Public |
 | Sube bien pero los demás no la ven | Permiso «Ver fotos de otros», y que la foto no esté oculta en Fotos |
 | «El servidor no puede procesar fotos» | Falta la extensión PHP **GD con WebP** en el hosting |
 | «Muchos intentos en la última hora» | Opción «Subidas por hora y persona» |
 | En los comentarios sale el avatar genérico | Orden de plugins: MiFoto antes que Gravatar |
+
+Una foto que ocultas, o a cuyo grupo le quitas el permiso, puede seguir viéndose en el navegador de quien ya la tenía hasta 10 minutos (el tiempo de caché; se cambia en Ajustes). La foto de un usuario bloqueado deja de servirse.
 
 ## 10. Desinstalar
 

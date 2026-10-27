@@ -43,6 +43,9 @@ final class HtmlView extends BaseHtmlView
 
 	public bool $canModerate = false;
 
+	/** Names and usernames of everybody are for moderators only. */
+	public bool $restricted = false;
+
 	public function display($tpl = null): void
 	{
 		$app   = Factory::getApplication();
@@ -57,7 +60,8 @@ final class HtmlView extends BaseHtmlView
 		$this->count = $data->count($this->filter, $this->search);
 		$this->pages = max(1, (int) ceil($this->count / self::PER_PAGE));
 		$this->page  = max(1, min($this->pages, (int) $input->getInt('pagina', 1)));
-		$this->items = $data->album($this->filter, ($this->page - 1) * self::PER_PAGE, self::PER_PAGE, $this->search, $this->filter === 'sin' ? 'id' : 'recent');
+		$this->restricted = !$app->getIdentity()->authorise('mifoto.moderate', 'com_mifoto');
+		$this->items = $this->restricted ? [] : $data->album($this->filter, ($this->page - 1) * self::PER_PAGE, self::PER_PAGE, $this->search, $this->filter === 'sin' ? 'id' : 'recent');
 
 		// The selected photo is one of the page's; with none chosen (or a stale link) the first one is.
 		$key = strtolower((string) $input->getAlnum('pkey', ''));

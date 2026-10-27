@@ -136,7 +136,7 @@
 						var label = (KEYS.filter(function (x) { return x[0] === k; })[0] || [0, ''])[1];
 
 						if (silent) { msg.hidden = true; } else {
-							say((T.SAVED || '%s · %s').replace('%s', row ? row.title : '').replace('%s', T[label] || k) + ' ' + stateText(row ? row.cells[k] : ''), false, function () { toggle(g, k, true); });
+							say((T.SAVED || '%s · %s').replace('%s', function () { return row ? row.title : ''; }).replace('%s', function () { return T[label] || k; }) + ' ' + stateText(row ? row.cells[k] : ''), false, function () { toggle(g, k, true); });
 						}
 					} else {
 						say((data && data.message) || T.ERR_SAVE || 'Error', true);

@@ -49,7 +49,9 @@ echo S::open('photos', $tt);
 				<?php endforeach; ?>
 			</nav>
 
-			<?php if (!$this->items) : ?>
+			<?php if ($this->restricted) : ?>
+				<p class="mfa-empty"><?php echo $t('COM_MIFOTO_A_RESTRICTED'); ?></p>
+			<?php elseif (!$this->items) : ?>
 				<p class="mfa-empty"><?php echo $t($this->search !== '' || $this->filter !== 'con' ? 'COM_MIFOTO_A_EMPTY_FILTER' : 'COM_MIFOTO_PHOTOS_EMPTY'); ?></p>
 			<?php else : ?>
 				<div class="mfa-album is-big">
