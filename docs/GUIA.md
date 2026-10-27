@@ -10,7 +10,7 @@ Fotos de perfil para Joomla 5 y 6. Cada persona sube su foto desde su perfil; t�
    - **Contenido - MiFoto**: las etiquetas `{user}` en artículos y módulos.
    - **Engage - MiFoto**: la foto en los comentarios de Akeeba Engage (solo si usas Engage).
 3. El módulo **MiFoto - Foto del usuario** (Extensiones → Módulos → Nuevo) pone el mismo bloque de subir/recortar/cambiar/quitar **donde tú lo coloques**, sin depender de la plantilla. Es la forma segura si tu plantilla personaliza la página «Edite su perfil» y el bloque no aparece dentro del formulario (ver el apartado 9). Asígnalo a esa página y a la posición que quieras. No lo uses a la vez que el bloque del formulario: saldría dos veces.
-4. Componentes → MiFoto → **Permisos**. Los permisos empiezan sin asignar, así que ningún usuario normal puede subir ni ver fotos hasta que los des:
+4. Componentes → MiFoto → pestaña **Permisos**. Los permisos empiezan sin asignar, así que ningún usuario normal puede subir ni ver fotos hasta que los des. **Se dan con un clic**: pulsa la casilla del grupo y el permiso (Subir, Ver, Moderar); se guarda al momento en los permisos de Joomla y puedes deshacerlo. Una casilla con trazo fino significa que el grupo ya lo tiene porque lo hereda de uno de arriba; Super Users siempre puede todo. Si algo está denegado a propósito, se cambia en «Permisos avanzados de Joomla» (botón de esa pantalla):
 
 | Permiso | Para qué | Normalmente a |
 |---|---|---|
@@ -20,9 +20,9 @@ Fotos de perfil para Joomla 5 y 6. Cada persona sube su foto desde su perfil; t�
 
 El Super Usuario lo puede todo siempre.
 
-## 2. Opciones
+## 2. Ajustes
 
-Componentes → MiFoto → Opciones.
+Componentes → MiFoto → pestaña **Ajustes**. Se guardan con el guardado de Joomla (con su comprobación de permisos).
 
 - **Carpeta**: dónde se guardan (por defecto `images/MiFoto`). Queda cerrada al acceso directo: las fotos solo salen por el componente, que comprueba el permiso en cada petición.
 - **Peso máximo de la subida**: lo que se rechaza antes de procesar. La foto guardada pesa mucho menos.
@@ -34,7 +34,9 @@ Componentes → MiFoto → Opciones.
 
 **El usuario**, en su perfil (la página donde cambia nombre, correo y contraseña), ve el bloque «Foto de perfil»: *Subir foto*, *Cambiar foto*, *Quitar foto*. Al elegir una foto puede encuadrarla (arrastrar y zoom) o usarla entera. Sin foto se muestran sus iniciales sobre un color fijo.
 
-**Tú**, en Componentes → MiFoto → Fotos, ves todas las fotos con buscador. Puedes *Ocultar* una (solo la ven su dueño y los moderadores), *Mostrar* y *Quitar*. Lo mismo, sin salir de la página, en la edición de cada usuario del administrador (pestaña «Foto de perfil»). Un moderador no puede subir una foto por otra persona: solo el dueño.
+**Tú**, al abrir Componentes → MiFoto, ves el **álbum**: la portada dice cuántos usuarios ya tienen foto y una barra con un bloque por usuario; debajo, cada usuario es un cromo numerado (con su foto) o un hueco con puntos si todavía no la ha subido. A la derecha, el **estado** de la instalación («Todo en orden» o lo que falta, con un botón para arreglarlo) y un resumen de quién puede qué.
+
+En la pestaña **Fotos** ves todas con buscador y filtros (Todas, Visibles, Ocultas, Sin foto). Al pulsar un cromo aparece a la derecha en grande, con sus botones *Ocultar* (solo la ven su dueño y los moderadores) o *Mostrar*, *Quitar* y *Ver usuario*. Lo mismo, sin salir de la página, en la edición de cada usuario del administrador (pestaña «Foto de perfil»). Un moderador no puede subir una foto por otra persona: solo el dueño.
 
 ## 4. Cómo se guarda la foto
 
@@ -91,7 +93,7 @@ $html   = $service->avatarHtml($userId, 64, null, 'Marta');   // <img> o inicial
 | Síntoma | Qué mirar |
 |---|---|
 | No sale el bloque en el perfil | 1) ¿Está activado «Usuario - MiFoto»? 2) Si la página «Edite su perfil» está personalizada (plantilla con override en `html/com_users/profile/edit.php`), muchas plantillas solo pintan los campos básicos y se saltan los que añaden los plugins. Dos soluciones: usa el **módulo** «MiFoto - Foto del usuario» (apartado 1), o en ese `edit.php` añade, justo antes de los botones Guardar y Cancelar: `<?php foreach ($this->form->getFieldsets() as $fieldset) : ?><?php if ($fieldset->name === 'core') { continue; } ?><?php echo $this->form->renderFieldset($fieldset->name); ?><?php endforeach; ?>` |
-| «Tu grupo no puede subir foto» | Permiso «Subir su propia foto» en Opciones → Permisos |
+| «Tu grupo no puede subir foto» | La casilla «Subir» de tu grupo en la pestaña Permisos |
 | Sube bien pero los demás no la ven | Permiso «Ver fotos de otros», y que la foto no esté oculta en Fotos |
 | «El servidor no puede procesar fotos» | Falta la extensión PHP **GD con WebP** en el hosting |
 | «Muchos intentos en la última hora» | Opción «Subidas por hora y persona» |

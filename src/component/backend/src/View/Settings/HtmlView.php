@@ -11,11 +11,13 @@ namespace Chaska\Component\Mifoto\Administrator\View\Settings;
 
 defined('_JEXEC') || die;
 
+use Chaska\Component\Mifoto\Administrator\Service\AdminData;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
 
 /**
@@ -25,6 +27,9 @@ use Joomla\Registry\Registry;
 final class HtmlView extends BaseHtmlView
 {
 	public Registry $params;
+
+	/** @var array{users: int, visible: int, hidden: int, with: int, without: int} */
+	public array $totals = ['users' => 0, 'visible' => 0, 'hidden' => 0, 'with' => 0, 'without' => 0];
 
 	public int $extensionId = 0;
 
@@ -38,12 +43,12 @@ final class HtmlView extends BaseHtmlView
 		$user = Factory::getApplication()->getIdentity();
 
 		$this->params      = ComponentHelper::getParams('com_mifoto');
+		$this->totals      = (new AdminData(Factory::getContainer()->get(DatabaseInterface::class)))->totals();
 		$this->extensionId = (int) ComponentHelper::getComponent('com_mifoto')->id;
 		$this->canEdit     = $user->authorise('core.admin', 'com_mifoto') || $user->authorise('core.options', 'com_mifoto');
 		$this->return      = base64_encode('index.php?option=com_mifoto&view=settings');
 
-		ToolbarHelper::title(Text::_('COM_MIFOTO_SETTINGS_TITLE'), 'cog');
-		ToolbarHelper::link('index.php?option=com_mifoto&view=photos', 'COM_MIFOTO_MENU_PHOTOS', 'users');
+		ToolbarHelper::title(Text::_('COM_MIFOTO'), 'image');
 
 		parent::display($tpl);
 	}

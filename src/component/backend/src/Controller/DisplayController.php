@@ -13,8 +13,8 @@ defined('_JEXEC') || die;
 
 use Joomla\CMS\MVC\Controller\BaseController;
 
-/** The component opens on the list of photos. */
+/** The component opens on the dashboard (the album). */
 final class DisplayController extends BaseController
 {
-	protected $default_view = 'photos';
+	protected $default_view = 'panel';
 }
