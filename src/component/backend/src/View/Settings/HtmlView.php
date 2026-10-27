@@ -17,6 +17,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use Chaska\Component\Mifoto\Administrator\Service\Health;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Registry\Registry;
 
@@ -35,6 +36,9 @@ final class HtmlView extends BaseHtmlView
 
 	public bool $canEdit = false;
 
+	/** @var array<string, string>|null  the Engage plugin check, shown only when it is a warning */
+	public ?array $engage = null;
+
 	/** Where com_config sends the person after saving: back to this screen (base64, as com_config expects). */
 	public string $return = '';
 
@@ -43,7 +47,10 @@ final class HtmlView extends BaseHtmlView
 		$user = Factory::getApplication()->getIdentity();
 
 		$this->params      = ComponentHelper::getParams('com_mifoto');
-		$this->totals      = (new AdminData(Factory::getContainer()->get(DatabaseInterface::class)))->totals();
+		$db                = Factory::getContainer()->get(DatabaseInterface::class);
+		$this->totals      = (new AdminData($db))->totals();
+		$engage            = Health::engage($db);
+		$this->engage      = $engage !== null && $engage['status'] === 'warn' ? $engage : null;
 		$this->extensionId = (int) ComponentHelper::getComponent('com_mifoto')->id;
 		$this->canEdit     = $user->authorise('core.admin', 'com_mifoto') || $user->authorise('core.options', 'com_mifoto');
 		$this->return      = base64_encode('index.php?option=com_mifoto&view=settings');

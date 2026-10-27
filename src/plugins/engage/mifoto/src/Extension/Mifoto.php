@@ -38,6 +38,15 @@ final class Mifoto extends CMSPlugin implements SubscriberInterface
 		$user = $event->getArgument(0);
 		$size = (int) ($event->getArgument(1) ?? 48);
 
+		// Engage 3.4.13+ adds a third argument: where the avatar will be used ('page', 'email' or 'static'). The photo depends on WHO
+		// is looking, so it must only be given for a live page, never for e-mails or shared caches. Older Engage sends nothing: page.
+		$context = $event->getArgument(2);
+
+		if (\is_string($context) && $context !== '' && $context !== 'page')
+		{
+			return;
+		}
+
 		// Guests reach Engage as a fake user with only an e-mail (id 0): MiFoto has no photo for them.
 		if (!$user instanceof User || (int) $user->id < 1 || !ComponentHelper::isEnabled('com_mifoto'))
 		{

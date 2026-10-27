@@ -18,6 +18,10 @@ Profile photos for Joomla 5 and 6, as a single package (`pkg_mifoto`) that other
 | `plg_engage_mifoto` | Photos in Akeeba Engage comments |
 | `mod_mifoto_photo` | The profile photo block, placeable anywhere |
 
+## For visitors to see the photos
+
+Three things at once: the **View photos** permission for the Public group, the photo in the **visible** state, and the plugin that draws it ("Engage - MiFoto", "Content - MiFoto") with **Access = Public**. The installer sets the access; the Panel and Settings warn if it is not right.
+
 ## Documentation
 
 - [User guide](docs/GUIDE.md) (Spanish: [GUIA.md](docs/GUIA.md))
@@ -27,11 +31,11 @@ Profile photos for Joomla 5 and 6, as a single package (`pkg_mifoto`) that other
 
 ```
 python build/build.py        # builds dist/pkg_mifoto_<version>.zip
-php tests/01-imagen.php      # also 02, 04, 05, 06; node tests/03-recorte.js
+php tests/01-imagen.php      # also 02, 04, 05, 06, 07; node tests/03-recorte.js
 ```
 
 ## Status
 
-Version 0.4.0. Unit tests pass and the admin screens were checked in a browser against a simulated Joomla; it has not yet been tested end to end in a real Joomla 6 installation.
+Version 0.4.1 (security review fixes and public access for the Engage and Content plugins). Unit tests pass and the admin screens were checked in a browser against a simulated Joomla; it has not yet been tested end to end in a real Joomla 6 installation.
 
 License: GPL-3.0-or-later.

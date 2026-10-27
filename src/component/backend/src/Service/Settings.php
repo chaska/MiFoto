@@ -88,14 +88,15 @@ final class Settings
 	}
 
 	/**
-	 * The folder is always inside the Joomla root and made only of letters, digits, "_", "-" and "/". Anything else
+	 * The folder is always a sub-folder of "images" inside the Joomla root and made only of letters, digits, "_", "-" and "/". Anything else
 	 * (".." , absolute paths, drive letters, wrappers like php://, spaces, NUL) falls back to the default.
 	 */
 	public static function cleanPath(string $path): string
 	{
 		$path = trim(str_replace('\\', '/', $path), '/');
 
-		if ($path === '' || !preg_match('~^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*$~D', $path))
+		// Always a sub-folder of "images": a path like "templates" or "administrator" would have MiFoto write its "deny all" files into Joomla itself.
+		if ($path === '' || !preg_match('~^images/[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*$~D', $path))
 		{
 			return self::DEFAULT_PATH;
 		}

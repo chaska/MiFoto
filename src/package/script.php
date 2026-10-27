@@ -21,10 +21,21 @@ use Joomla\Database\ParameterType;
  *  - on a fresh install, and
  *  - once when upgrading from a version older than 0.3.0 (the first one with this script).
  * Any later update leaves the plugins exactly as the administrator set them. Options, permissions and photos are never touched.
+ *
+ * Joomla only loads a plugin for people whose access level matches the plugin's. The Engage and Content plugins must work for
+ * visitors who are not logged in, so they need "Public"; in some installs they ended up as "Registered" and guests saw no photo.
+ * They are set to Public on a fresh install and, once, when upgrading from a version older than 0.4.1, and only if they are still
+ * "Registered" (anything else the administrator chose is respected). The User plugin only serves logged-in people: left alone.
  * Nothing here can stop the installation: every problem is swallowed and the plugins can still be switched on by hand.
  */
 return new class () implements InstallerScriptInterface {
 	private const FIRST_VERSION_WITH_SCRIPT = '0.3.0';
+
+	private const FIRST_VERSION_WITH_ACCESS = '0.4.1';
+
+	private const PUBLIC_LEVEL = 1;
+
+	private const REGISTERED_LEVEL = 2;
 
 	/** The version that was installed before this one ('' on a fresh install). */
 	private string $previous = '';
@@ -70,26 +81,48 @@ return new class () implements InstallerScriptInterface {
 	{
 		$firstTime = $type === 'install'
 			|| ($type === 'update' && $this->previous !== '' && version_compare($this->previous, self::FIRST_VERSION_WITH_SCRIPT, '<'));
+		$fixAccess = $type === 'install'
+			|| ($type === 'update' && $this->previous !== '' && version_compare($this->previous, self::FIRST_VERSION_WITH_ACCESS, '<'));
 
-		if (!$firstTime)
+		if (!$firstTime && !$fixAccess)
 		{
 			return true;
 		}
 
 		try
 		{
-			$db    = Factory::getContainer()->get(DatabaseInterface::class);
-			$query = $db->getQuery(true)
-				->update($db->quoteName('#__extensions'))
-				->set($db->quoteName('enabled') . ' = 1')
-				->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
-				->where($db->quoteName('element') . ' = ' . $db->quote('mifoto'))
-				->whereIn($db->quoteName('folder'), ['user', 'content', 'engage'], ParameterType::STRING);
-			$db->setQuery($query)->execute();
+			$db = Factory::getContainer()->get(DatabaseInterface::class);
+
+			if ($firstTime)
+			{
+				$query = $db->getQuery(true)
+					->update($db->quoteName('#__extensions'))
+					->set($db->quoteName('enabled') . ' = 1')
+					->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+					->where($db->quoteName('element') . ' = ' . $db->quote('mifoto'))
+					->whereIn($db->quoteName('folder'), ['user', 'content', 'engage'], ParameterType::STRING);
+				$db->setQuery($query)->execute();
+			}
+
+			if ($fixAccess)
+			{
+				$public     = self::PUBLIC_LEVEL;
+				$registered = self::REGISTERED_LEVEL;
+				$query      = $db->getQuery(true)
+					->update($db->quoteName('#__extensions'))
+					->set($db->quoteName('access') . ' = :public')
+					->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+					->where($db->quoteName('element') . ' = ' . $db->quote('mifoto'))
+					->whereIn($db->quoteName('folder'), ['content', 'engage'], ParameterType::STRING)
+					->where($db->quoteName('access') . ' = :registered')
+					->bind(':public', $public, ParameterType::INTEGER)
+					->bind(':registered', $registered, ParameterType::INTEGER);
+				$db->setQuery($query)->execute();
+			}
 		}
 		catch (\Throwable $e)
 		{
-			// Not worth failing the installation: the plugins can be switched on in Extensions > Plugins.
+			// Not worth failing the installation: the plugins can be switched on / set to Public in Extensions > Plugins.
 		}
 
 		return true;

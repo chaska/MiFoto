@@ -44,14 +44,14 @@ afirma(count($colors) >= 6, 'los colores se reparten (' . count($colors) . ' de 
 seccion('Carpeta de almacenamiento: solo dentro de la web y con caracteres seguros');
 // Settings::cleanPath es estatica, pero la clase importa clases de Joomla; se comprueba que la regla sigue en el codigo y se prueba una copia.
 $src = (string) file_get_contents($dir . 'Settings.php');
-afirma(str_contains($src, "'~^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*\$~D'"), 'la regla de ruta segura sigue en Settings tal como se prueba aqui');
+afirma(str_contains($src, "'~^images/[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*\$~D'"), 'la regla de ruta segura sigue en Settings tal como se prueba aqui');
 $rule = static function (string $path): string {
 	$path = trim(str_replace('\\', '/', $path), '/');
-	return ($path === '' || !preg_match('~^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*$~D', $path)) ? 'images/MiFoto' : $path;
+	return ($path === '' || !preg_match('~^images/[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*$~D', $path)) ? 'images/MiFoto' : $path;
 };
 afirma($rule('images/MiFoto') === 'images/MiFoto', 'la ruta por defecto vale');
 afirma($rule('/images/fotos/') === 'images/fotos', 'barras sobrantes se quitan');
-foreach (['../etc', 'images/../..', 'C:/x', 'php://temp', 'a b', "a\0b", '', '/', '..', 'images//x', 'images/x.php', '%2e%2e/x'] as $bad) {
+foreach (['../etc', 'images/../..', 'C:/x', 'php://temp', 'a b', "a\0b", '', '/', '..', 'images//x', 'images/x.php', 'templates', 'administrator/cache', 'images', 'plugins/mifoto', 'imagesx/a', '%2e%2e/x'] as $bad) {
 	afirma($rule($bad) === 'images/MiFoto', 'ruta hostil [' . addcslashes($bad, "\0..\37") . '] vuelve a la de por defecto');
 }
 
