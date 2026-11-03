@@ -27,6 +27,7 @@
   <a href="#todas-las-opciones">Todas las opciones</a> ·
   <a href="#instalar">Instalar</a> ·
   <a href="#seguridad">Seguridad</a> ·
+  <a href="#colaborar-traducciones">Traducir</a> ·
   <a href="#autor-y-licencia">Licencia</a>
 </p>
 
@@ -233,6 +234,13 @@ php tests/01-imagen.php    # y 02, 04, 05, 06, 07, 08; node tests/03-recorte.js 
   **sin IP ni navegador**. Quitar la foto marca el consentimiento como retirado. El plugin de privacidad exporta y borra los datos de una persona,
   y al borrar una cuenta se borra su foto. MiFoto no usa cookies propias. Los textos legales son una base, no asesoramiento jurídico.
 </details>
+
+## Colaborar: traducciones
+
+MiFoto viene en español e inglés y se puede traducir a más idiomas sin saber programar. Guía paso a paso: [docs/TRADUCIR.md](docs/TRADUCIR.md).
+Cómo colaborar (traducciones, errores y cómo avisar en privado de un fallo de seguridad): [CONTRIBUTING.md](CONTRIBUTING.md).
+`php build/idiomas.php comprobar xx-XX` revisa una traducción antes de enviarla: que no falte ningún texto, que se respeten los `%s` y que no lleve scripts ni direcciones externas.
+Solo entran idiomas completos y revisados por una persona; salen en la siguiente versión, con su crédito en [NOTICE.md](NOTICE.md).
 
 ## Autor y licencia
 

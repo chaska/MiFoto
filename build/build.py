@@ -4,17 +4,22 @@
 Run:  python build/build.py
 Zip entries always use "/" (Joomla's installer needs it; Compress-Archive on old PowerShell writes "\\").
 Before zipping, every file the manifests name must exist and every XML must parse; otherwise nothing is written.
+The language files are checked first with build/idiomas.php (needs PHP: on the PATH or in MIFOTO_PHP): a broken or malicious
+translation never reaches the ZIP. MIFOTO_BUILD_SRC and MIFOTO_BUILD_DIST change the source and output folders (tests).
 """
 import io
+import os
 import re
+import shutil
+import subprocess
 import sys
 import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / 'src'
-DIST = ROOT / 'dist'
+SRC = Path(os.environ.get('MIFOTO_BUILD_SRC') or ROOT / 'src')
+DIST = Path(os.environ.get('MIFOTO_BUILD_DIST') or ROOT / 'dist')
 SKIP_NAMES = {'.DS_Store', 'Thumbs.db'}
 SKIP_SUFFIXES = {'.bak', '.orig', '.tmp'}
 
@@ -91,8 +96,22 @@ def make_zip(folder: Path) -> bytes:
 	return buf.getvalue()
 
 
+def check_languages():
+	"""Every translation against en-GB: same keys and placeholders, no scripts, no new tags or addresses (build/idiomas.php)."""
+	php = os.environ.get('MIFOTO_PHP') or shutil.which('php')
+	if not php:
+		fail('no encuentro PHP para comprobar los idiomas: ponlo en el PATH o en la variable MIFOTO_PHP')
+	run = subprocess.run([php, str(ROOT / 'build' / 'idiomas.php'), 'comprobar', 'todos'], capture_output=True, text=True, encoding='utf-8',
+		env={**os.environ, 'MIFOTO_BUILD_SRC': str(SRC)})
+	if run.returncode != 0:
+		for line in [l for l in run.stdout.splitlines() if l.startswith('ERROR')][:15]:
+			print('IDIOMAS: ' + line)
+		fail('problemas en los archivos de idioma (php build/idiomas.php comprobar todos). No se genera el paquete.')
+
+
 def main():
-	roots = [check_manifest(folder, MANIFESTS.get(name, 'mifoto.xml')) for name, folder in PARTS.items()]
+	check_languages()
+	roots =[check_manifest(folder, MANIFESTS.get(name, 'mifoto.xml')) for name, folder in PARTS.items()]
 	pkg = ET.parse(SRC / 'package' / 'pkg_mifoto.xml').getroot()
 
 	script = pkg.findtext('scriptfile')
