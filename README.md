@@ -6,10 +6,16 @@
 </p>
 
 <p align="center">
-  <a href="../../releases/latest"><img src="https://img.shields.io/badge/versión-0.5.2-f2a93b?style=flat-square" alt="Versión 0.5.2"></a>
+  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/chaska/MiFoto?label=versi%C3%B3n&color=f2a93b&style=flat-square" alt="Última versión"></a>
   <img src="https://img.shields.io/badge/Joomla-5%20·%206-3ccb8f?style=flat-square" alt="Joomla 5 y 6">
   <img src="https://img.shields.io/badge/PHP-8.1%20o%20superior-a77bf3?style=flat-square" alt="PHP 8.1 o superior">
-  <img src="https://img.shields.io/badge/licencia-GPL--3.0-4fa3f7?style=flat-square" alt="Licencia GPL-3.0">
+  <img src="https://img.shields.io/badge/idiomas-español%20·%20inglés-e86f5c?style=flat-square" alt="En español e inglés">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-GPL--3.0-4fa3f7?style=flat-square" alt="Licencia GPL-3.0"></a>
+</p>
+
+<p align="center">
+  <a href="../../releases/latest"><img alt="Descargar la última versión (ZIP para instalar en Joomla)" src="https://img.shields.io/badge/%E2%AC%87%20Descargar-ZIP%20para%20instalar-2ea44f?style=for-the-badge"></a><br>
+  <sub>En la página que se abre, baja a «Assets» y descarga <code>pkg_mifoto_….zip</code>. No uses el botón verde «Code».</sub>
 </p>
 
 <p align="center">
@@ -37,6 +43,8 @@
 | **Aviso legal y consentimiento** | Antes de subir, la persona ve quién verá su foto y dónde, y marca dos casillas. La aceptación queda registrada (sin IP). |
 | **Denuncias y moderación** | Cualquier persona con sesión puede denunciar una foto al ampliarla; tú ocultas, quitas o descartas desde una pestaña. |
 | **Funciona con otras extensiones** | Comentarios de [Engage](https://github.com/chaska/engage), la etiqueta `{user}` en artículos, un módulo y un servicio PHP para quien programe. |
+
+**Idiomas:** todas las pantallas, avisos y plugins vienen en español e inglés; Joomla usa el idioma de cada persona.
 
 **Probado en:** Joomla 6.2 · PHP 8.4 · plantilla Helix Ultimate · [Engage](https://github.com/chaska/engage) 3.4.14 (hasta la versión 0.4).
 Lo nuevo de la 0.5 (consentimiento, denuncias, ampliar foto y plugin de privacidad) pasa sus 353 pruebas automáticas
