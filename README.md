@@ -36,9 +36,9 @@
 | **Tú decides el aspecto** | Forma, marco y sombra iguales en toda la web. Quien no tiene foto sale con sus iniciales sobre un color fijo. |
 | **Aviso legal y consentimiento** | Antes de subir, la persona ve quién verá su foto y dónde, y marca dos casillas. La aceptación queda registrada (sin IP). |
 | **Denuncias y moderación** | Cualquier persona con sesión puede denunciar una foto al ampliarla; tú ocultas, quitas o descartas desde una pestaña. |
-| **Funciona con otras extensiones** | Comentarios de Akeeba Engage, la etiqueta `{user}` en artículos, un módulo y un servicio PHP para quien programe. |
+| **Funciona con otras extensiones** | Comentarios de [Engage](https://github.com/chaska/engage), la etiqueta `{user}` en artículos, un módulo y un servicio PHP para quien programe. |
 
-**Probado en:** Joomla 6.2 · PHP 8.4 · plantilla Helix Ultimate · Akeeba Engage 3.4.14 (hasta la versión 0.4).
+**Probado en:** Joomla 6.2 · PHP 8.4 · plantilla Helix Ultimate · [Engage](https://github.com/chaska/engage) 3.4.14 (hasta la versión 0.4).
 Lo nuevo de la 0.5 (consentimiento, denuncias, ampliar foto y plugin de privacidad) pasa sus 353 pruebas automáticas
 pero **todavía no se ha probado en un Joomla real**.
 
@@ -162,7 +162,7 @@ No se puede denunciar la propia, ni la misma dos veces mientras siga abierta, y 
 |---|---|---|
 | **Usuario - MiFoto** | Pone el bloque «Foto de perfil» en el perfil y la moderación (ocultar, mostrar, quitar) en la ficha de cada usuario del administrador. | — |
 | **Contenido - MiFoto** | Cambia las etiquetas `{user}` por fotos en artículos y módulos: `{user}` la de quien lee, `{user 42}` la del usuario 42, `{user 42 size=96}` a 96 px. | Tamaño por defecto: 32, 64 (por defecto), 96, 128 o 300 px |
-| **Engage - MiFoto** | Usa la foto como avatar en los comentarios de Akeeba Engage. Ponlo antes que «Engage - Gravatar» en el orden de plugins. | — |
+| **Engage - MiFoto** | Usa la foto como avatar en los comentarios de [Engage](https://github.com/chaska/engage) (bifurcación mantenida de Akeeba Engage). Ponlo antes que «Engage - Gravatar» en el orden de plugins. | — |
 | **Privacidad - MiFoto** | Añade la foto, los consentimientos y las denuncias de una persona a las peticiones de privacidad de Joomla (exportar y borrar sus datos). | — |
 | **MiFoto - Foto del usuario** (módulo) | El mismo bloque del perfil donde lo coloques, por si tu plantilla no lo muestra. A quien no tiene sesión no le enseña nada. | — |
 
@@ -237,7 +237,7 @@ MiFoto no incluye librerías ni fuentes de terceros: todo el código es propio y
 | Nombre | Para qué | Licencia |
 |---|---|---|
 | [Joomla!](https://www.joomla.org/) | La plataforma sobre la que funciona (no va incluido en el paquete) | GPL-2.0 o posterior |
-| [Akeeba Engage](https://www.akeeba.com/products/engage.html) | Opcional: el plugin «Engage - MiFoto» pone las fotos en sus comentarios (no va incluido) | GPL-3.0 |
+| [Engage](https://github.com/chaska/engage) | Opcional: el plugin «Engage - MiFoto» pone las fotos en sus comentarios (no va incluido). Es nuestra bifurcación de Akeeba Engage, que su autor ha dejado de mantener; descarga en [su última versión](https://github.com/chaska/engage/releases/latest) | GPL-3.0 |
 
 Joomla! es marca de Open Source Matters; este proyecto no está afiliado a Open Source Matters ni al proyecto Joomla.
 </details>
